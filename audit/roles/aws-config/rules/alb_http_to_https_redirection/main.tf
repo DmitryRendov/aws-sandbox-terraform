@@ -1,5 +1,6 @@
 ##
-# ORG Custom Config Rule to check for SQS encryption compliance.
+# ORG Custom Config Rule to check whether HTTP to HTTPS redirection is
+# configured on all HTTP listeners of Application Load Balancers.
 #
 data "aws_region" "current" {}
 
@@ -11,31 +12,29 @@ module "lambda_label" {
   source      = "../../../../../modules/base/null-label/v2"
   environment = "audit"
   role_name   = "aws-config"
-  attributes  = ["sqs", "encryption", data.aws_region.current.name]
+  attributes  = ["alb", "https", "redirection", data.aws_region.current.name]
 }
 
 data "aws_iam_role" "org_lambda_role" {
   name = var.org_lambda_role_id
 }
 
-resource "aws_iam_policy" "sqs_encryption" {
+resource "aws_iam_policy" "lambda_policy" {
   name   = module.lambda_label.id
   path   = "/"
-  policy = data.aws_iam_policy_document.sqs_encryption_lambda.json
+  policy = data.aws_iam_policy_document.lambda_policy_doc.json
 }
 
 resource "aws_iam_role_policy_attachment" "default" {
   role       = var.org_lambda_cross_account_role_id
-  policy_arn = aws_iam_policy.sqs_encryption.arn
+  policy_arn = aws_iam_policy.lambda_policy.arn
 }
 
-data "aws_iam_policy_document" "sqs_encryption_lambda" {
+data "aws_iam_policy_document" "lambda_policy_doc" {
   statement {
-    sid = "SQSList"
+    sid = "ELB"
     actions = [
-      "sqs:GetQueueAttributes",
-      "sqs:ListQueues",
-      "sqs:ListQueueTags",
+      "elasticloadbalancing:Describe*",
     ]
     effect    = "Allow"
     resources = ["*"]
@@ -62,10 +61,10 @@ data "aws_iam_policy_document" "sqs_encryption_lambda" {
 }
 
 // TODO: Move source code to S3 bucket and CircleCI
-data "archive_file" "sqs_encryption" {
+data "archive_file" "lambda_package" {
   type        = "zip"
-  source_file = "${path.module}/files/sqs_encryption/sqs_encryption.py"
-  output_path = "${path.module}/files/sqs_encryption.zip"
+  source_file = "${path.module}/files/alb_http_to_https_redirection/alb_http_to_https_redirection.py"
+  output_path = "${path.module}/files/alb_http_to_https_redirection.zip"
 }
 
 resource "aws_lambda_permission" "lambda_permission" {
@@ -78,15 +77,15 @@ resource "aws_lambda_permission" "lambda_permission" {
 }
 
 resource "aws_lambda_function" "default" {
-  filename         = data.archive_file.sqs_encryption.output_path
+  filename         = data.archive_file.lambda_package.output_path
   function_name    = local.lambda_function_id
   role             = data.aws_iam_role.org_lambda_role.arn
-  handler          = "sqs_encryption.lambda_handler"
+  handler          = "alb_http_to_https_redirection.lambda_handler"
   memory_size      = 128
-  source_code_hash = data.archive_file.sqs_encryption.output_base64sha256
+  source_code_hash = data.archive_file.lambda_package.output_base64sha256
   runtime          = "python3.8"
   timeout          = 60
-  description      = "Lambda for Custom Config Rule to check for SQS encryption compliance."
+  description      = "Checks whether HTTP to HTTPS redirection is configured on all HTTP listeners of Application Load Balancers. The rule in NON_COMPLIANT if one or more HTTP listener of an Application Load Balancer do not have HTTP to HTTPS redirection configured."
 
   environment {
     variables = {
@@ -100,14 +99,14 @@ resource "aws_lambda_function" "default" {
 }
 
 
-resource "aws_config_organization_custom_rule" "sqs_encryption" {
+resource "aws_config_organization_custom_rule" "alb_http_to_https_redirection" {
   depends_on = [
     aws_lambda_function.default
   ]
-  name                = "sqs_encryption"
+  name                = "alb_http_to_https_redirection"
   trigger_types       = ["ScheduledNotification"]
   lambda_function_arn = aws_lambda_function.default.arn
-  description         = "Check whether SQS queue has encryption at rest enabled."
+  description         = "Checks whether HTTP to HTTPS redirection is configured on all HTTP listeners of Application Load Balancer. The rule is NON_COMPLIANT if one or more HTTP listeners of Application Load Balancer do not have HTTP to HTTPS redirection configured."
 
   maximum_execution_frequency = var.maximum_execution_frequency
   excluded_accounts           = var.exclude_accounts

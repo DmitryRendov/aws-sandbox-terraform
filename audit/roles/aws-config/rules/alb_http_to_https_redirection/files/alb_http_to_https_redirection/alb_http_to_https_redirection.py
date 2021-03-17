@@ -1,11 +1,10 @@
-"""Check whether SQS queue has encryption at rest enabled."""
-# Forked from: https://github.com/awslabs/aws-config-rules/blob/master/python/SQS_ENCRYPTED_CHECK/EFS_ENCRYPTED_CHECK.py
+"""Checks whether HTTP to HTTPS redirection is configured on all HTTP listeners of Application Load Balancers. The rule in NON_COMPLIANT if one or more HTTP listener of an Application Load Balancer do not have HTTP to HTTPS redirection configured. The rule ignores Internal Load Balancers.
+"""
+# Based on https://github.com/awslabs/aws-config-rules/blob/master/python/ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK/ALB_HTTP_TO_HTTPS_REDIRECTION_CHECK.py
 #
 # Trigger Type: Periodic checks
-# Scope of Changes: AWS::SQS::Queue
-# Accepted Parameters: QueueNameStartsWith
-#                        (Optional) Specify your SQS queue names to check for. Starting SQS queue names will suffice. For example, your SQS queue names are "processimages" and "extractdocs".
-#                                   You can specify process, extract as the value for QueueNameStartsWith
+# Scope of Changes: AWS::ElasticLoadBalancingV2::LoadBalancer
+# Accepted Parameters: None
 # Your Lambda function execution role will need to have a policy that provides
 # the appropriate permissions. Here is a policy that you can consider.
 # You should validate this for your own environment.
@@ -15,7 +14,6 @@ import sys
 import datetime
 import boto3
 import botocore
-import logging
 
 try:
     import liblogging
@@ -27,7 +25,7 @@ except ImportError:
 ##############
 
 # Define the default resource to report to Config Rules
-DEFAULT_RESOURCE_TYPE = 'AWS::SQS::Queue'
+DEFAULT_RESOURCE_TYPE = 'AWS::ElasticLoadBalancingV2::LoadBalancer'
 
 # Set to True to get the lambda to assume the Role attached on the Config Service (useful for cross-account).
 ASSUME_ROLE_MODE = True
@@ -41,50 +39,81 @@ CONFIG_ROLE_TIMEOUT_SECONDS = 900
 
 def evaluate_compliance(event, configuration_item, valid_rule_parameters):
     evaluations = []
-    yourqueues = []
-    check = {}
-    sqs = get_client('sqs', event)
-    if valid_rule_parameters:
-        yourqueues = valid_rule_parameters["QueueNameStartsWith"].split(",")
-        for queue in yourqueues:
-            caseinsensitivequeue = queue.lower()
-            response = sqs.list_queues(QueueNamePrefix=caseinsensitivequeue.strip())
-            if "QueueUrls" not in response.keys():
-                print("There are no SQS queues to check for.")
-                return None
-            for qurl in response["QueueUrls"]:
-                check = sqs.get_queue_attributes(QueueUrl=qurl, AttributeNames=['KmsMasterKeyId'],)
-                if "Attributes" in check.keys():
-                    evaluations.append(build_evaluation(qurl, 'COMPLIANT', event, annotation='SQS Queue URL is encrypted with KMS key: '+check["Attributes"]["KmsMasterKeyId"]))
-                else:
-                    evaluations.append(build_evaluation(qurl, 'NON_COMPLIANT', event, annotation='SQS Queue URL is not encrypted.'))
-    else:
-        # Checking all queues. Maximum number is 1000 queues.
-        response = sqs.list_queues()
-        if "QueueUrls" not in response.keys():
-            print("There are no SQS queues to check for.")
-            return None
-        for qurl in response["QueueUrls"]:
-            check = sqs.get_queue_attributes(QueueUrl=qurl, AttributeNames=['KmsMasterKeyId'],)
-            if "Attributes" in check.keys():
-                evaluations.append(build_evaluation(qurl, 'COMPLIANT', event, annotation='SQS Queue URL is encrypted with KMS key: '+check["Attributes"]["KmsMasterKeyId"]))
-            else:
-                evaluations.append(build_evaluation(qurl, 'NON_COMPLIANT', event, annotation='SQS Queue URL is not encrypted.'))
-
+    alb_client = get_client("elbv2", event)
+    all_elbv2 = get_all_elbv2(alb_client)
+    all_elbv2 = [elb for elb in all_elbv2 if elb['Type'] == "application"]
+    if not all_elbv2:
+        return build_evaluation(event['accountId'], 'NOT_APPLICABLE', event, resource_type='AWS::::Account')
+    for elb in all_elbv2:
+        alb_all_listeners = get_all_listeners(alb_client, elb['LoadBalancerArn'])
+        overall_listeners_eval = 'NON_COMPLIANT'
+        for lis in alb_all_listeners:
+            if is_https_listener(lis):
+                overall_listeners_eval = 'COMPLIANT'
+                continue
+            rules = get_all_listener_rules(alb_client, lis['ListenerArn'])
+            for rule in rules:
+                if is_rule_compliant(rule):
+                    overall_listeners_eval = 'COMPLIANT'
+                    continue
+                overall_listeners_eval = 'NON_COMPLIANT'
+                break
+            if overall_listeners_eval == 'NON_COMPLIANT':
+                break
+        # Exclude internal, private Load Balancers
+        if overall_listeners_eval == 'NON_COMPLIANT' and 'Scheme' in elb and elb['Scheme'] == "internal":
+            evaluations.append(build_evaluation(elb['LoadBalancerArn'], 'NOT_APPLICABLE', event, annotation='Internal Load Balancer with HTTP listener(s).'))
+        else:
+            evaluations.append(build_evaluation(elb['LoadBalancerArn'], overall_listeners_eval, event, annotation=get_str(overall_listeners_eval)))
     return evaluations
 
+def is_rule_compliant(rule):
+    compliant = True
+    for action in rule['Actions']:
+        if action['Type'] == 'redirect' and action['RedirectConfig']['Protocol'] == 'HTTPS':
+            compliant = True
+            continue
+        compliant = False
+        break
+    return compliant
+
+def get_str(compliance_value):
+    if compliance_value == 'NON_COMPLIANT':
+        return "HTTP listener rule must have HTTP to HTTPS redirection action configured"
+    return None
+
+def is_https_listener(listener):
+    if 'SslPolicy' in listener:
+        return True
+    return False
+
+def get_all_elbv2(client):
+    resp = client.describe_load_balancers(PageSize=400)
+    items = []
+    while resp:
+        items += resp['LoadBalancers']
+        resp = client.describe_load_balancers(Marker=resp['NextMarker']) if 'NextMarker' in resp else None
+    return items
+
+def get_all_listeners(client, elbv2_arn):
+    resp = client.describe_listeners(LoadBalancerArn=elbv2_arn, PageSize=400)
+    items = []
+    while resp:
+        items += resp['Listeners']
+        resp = client.describe_listeners(LoadBalancerArn=elbv2_arn, Marker=resp['NextMarker']) if 'NextMarker' in resp else None
+    return items
+
+def get_all_listener_rules(client, listener_arn):
+    resp = client.describe_rules(ListenerArn=listener_arn, PageSize=400)
+    items = []
+    while resp:
+        items += resp['Rules']
+        resp = client.describe_rules(ListenerArn=listener_arn, Marker=resp['NextMarker']) if 'NextMarker' in resp else None
+    return items
+
 def evaluate_parameters(rule_parameters):
-    try:
-        valid_rule_parameters = ""
-        if rule_parameters["QueueNameStartsWith"] != "" and isinstance(rule_parameters["QueueNameStartsWith"], str):
-            valid_rule_parameters = rule_parameters
-        else:
-            print("Please specify a valid starting SQS queue name or multiple queue names separated by comma(,)")
-        return valid_rule_parameters
-    except LookupError:
-        print("Please input QueueNameStartsWith as the key.")
-
-
+    valid_rule_parameters = rule_parameters
+    return valid_rule_parameters
 
 ####################
 # Helper Functions #
@@ -130,11 +159,11 @@ def build_evaluation(resource_id, compliance_type, event, resource_type=DEFAULT_
     compliance_type -- either COMPLIANT, NON_COMPLIANT or NOT_APPLICABLE
     event -- the event variable given in the lambda handler
     resource_type -- the CloudFormation resource type (or AWS::::Account) to report on the rule (default DEFAULT_RESOURCE_TYPE)
-    annotation -- an annotation to be added to the evaluation (default None). It will be truncated to 255 if longer.
+    annotation -- an annotation to be added to the evaluation (default None)
     """
     eval_cc = {}
     if annotation:
-        eval_cc['Annotation'] = build_annotation(annotation)
+        eval_cc['Annotation'] = annotation
     eval_cc['ComplianceResourceType'] = resource_type
     eval_cc['ComplianceResourceId'] = resource_id
     eval_cc['ComplianceType'] = compliance_type
@@ -147,11 +176,11 @@ def build_evaluation_from_config_item(configuration_item, compliance_type, annot
     Keyword arguments:
     configuration_item -- the configurationItem dictionary in the invokingEvent
     compliance_type -- either COMPLIANT, NON_COMPLIANT or NOT_APPLICABLE
-    annotation -- an annotation to be added to the evaluation (default None). It will be truncated to 255 if longer.
+    annotation -- an annotation to be added to the evaluation (default None)
     """
     eval_ci = {}
     if annotation:
-        eval_ci['Annotation'] = build_annotation(annotation)
+        eval_ci['Annotation'] = annotation
     eval_ci['ComplianceResourceType'] = configuration_item['resourceType']
     eval_ci['ComplianceResourceId'] = configuration_item['resourceId']
     eval_ci['ComplianceType'] = compliance_type
@@ -175,12 +204,6 @@ def get_execution_role_arn(event):
         role_arn = event['executionRoleArn']
 
     return role_arn
-
-# Build annotation within Service constraints
-def build_annotation(annotation_string):
-    if len(annotation_string) > 256:
-        return annotation_string[:244] + " [truncated]"
-    return annotation_string
 
 # Helper function used to validate input
 def check_defined(reference, reference_name):
@@ -230,7 +253,7 @@ def convert_api_configuration(configuration_item):
 def get_configuration_item(invoking_event):
     check_defined(invoking_event, 'invokingEvent')
     if is_oversized_changed_notification(invoking_event['messageType']):
-        configuration_item_summary = check_defined(invoking_event['configurationItemSummary'], 'configurationItemSummary')
+        configuration_item_summary = check_defined(invoking_event['configuration_item_summary'], 'configurationItemSummary')
         return get_configuration(configuration_item_summary['resourceType'], configuration_item_summary['resourceId'], configuration_item_summary['configurationItemCaptureTime'])
     if is_scheduled_notification(invoking_event['messageType']):
         return None
@@ -247,9 +270,7 @@ def is_applicable(configuration_item, event):
     event_left_scope = event['eventLeftScope']
     if status == 'ResourceDeleted':
         print("Resource Deleted, setting Compliance Status to NOT_APPLICABLE.")
-
     return status in ('OK', 'ResourceDiscovered') and not event_left_scope
-
 
 def get_assume_role_credentials(role_arn, region=None):
     sts_client = boto3.client('sts', region)
@@ -312,6 +333,7 @@ def lambda_handler(event, context):
 
     global AWS_CONFIG_CLIENT
 
+    #print(event)
     check_defined(event, 'event')
     invoking_event = json.loads(event['invokingEvent'])
     rule_parameters = {}

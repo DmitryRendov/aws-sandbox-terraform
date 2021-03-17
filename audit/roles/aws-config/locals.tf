@@ -2,7 +2,7 @@ locals {
   team      = "ops"
   role_name = "aws-config"
 
-  config_enabled = true
+  config_enabled = false
 
   aggregator_source_regions = ["us-west-2", "us-east-1", "eu-central-1"]
   exclude_accounts = [
