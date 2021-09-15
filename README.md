@@ -27,8 +27,8 @@ make apply-prod
 
 ## Layout ##
 
-### mob
-This is where the MOB applications live.
+### AWS Sandbox
+This is where the AWS Sandbox infrastructure live.
 
 ### audit|bastion|production ###
 Configuration for each respective account, there is only one account per directory
@@ -46,8 +46,8 @@ Examples:
 A role is a distinct functionality which requires typically requires it's own separate IAM role.
 
 Examples:
-* website
-* server
+* aws-config
+* atlantis
 * ecs
 
 ### **global-variables.tf.json ###
@@ -70,7 +70,7 @@ Shared Makefiles, scripts, plugins, providers, configurations
 Modules are in `/modules`, roughly divided into two categories: `base` and `site`
 
 `base` modules are modules that are used by other modules, or modules that are copied from the Internet. These are modules that we could conceivably release as open source.
-`site` modules are modules that have MOB specific configuration, and are unlikely to be ever released to the public. They very likely are a composition of other modules.
+`site` modules are modules that have AWS Sandbox specific configuration, and are unlikely to be ever released to the public. They very likely are a composition of other modules.
 
 ### Module versioniong ###
 
