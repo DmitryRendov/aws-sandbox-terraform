@@ -1,6 +1,8 @@
-# sqs_encryption
+# cloudfront_logging
 
-A Terraform module to deploy a custom AWS Config rule to check whether SQS queue has encryption at rest enabled..
+A Terraform module to deploy a custom AWS Config rule to check whether your Amazon CloudFront Distributions
+has proper logging configuration. The rule returns NON_COMPLIANT if the 'Logging' is
+not set to 'True' and an S3 bucket is not specified as a target.
 
 ## Information
 
@@ -16,14 +18,14 @@ A Terraform module to deploy a custom AWS Config rule to check whether SQS queue
 
 ## Accepted parameters
 
-* QueueNameStartsWith - (Optional) Specify your SQS queue names to check for. Starting SQS queue names will suffice. For example, your SQS queue names are "processimages" and "extractdocs".
+None
 
 ## Examples
 
 Deploy a custom Config Rule with a overriden maximum execution frequency (Default is `TwentyFour_Hours`):
 ```
-module "sqs_encryption" {
-  source = "./rules/sqs_encryption"
+module "cloudfront_logging" {
+  source = "./rules/cloudfront_logging"
 
   maximum_execution_frequency = "One_Hour"
   exclude_accounts            = []
@@ -32,17 +34,13 @@ module "sqs_encryption" {
 
   org_lambda_role_id = aws_iam_role.org_lambda_role.id
   org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
-
-  input_parameters = {
-    "QueueNameStartsWith" = null
-  }
 }
 ```
 
 Deploy a custom Config Rule to our second supported region `us-east-1`:
 ```
-module "sqs_encryption_east" {
-  source = "./rules/sqs_encryption"
+module "cloudfront_logging_east" {
+  source = "./rules/cloudfront_logging"
 
   maximum_execution_frequency = "TwentyFour_Hours"
   exclude_accounts            = []
@@ -52,12 +50,8 @@ module "sqs_encryption_east" {
   org_lambda_role_id = aws_iam_role.org_lambda_role.id
   org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
 
-  input_parameters = {
-    "QueueNameStartsWith" = null
-  }
-
   providers = {
-    aws         = aws.east
+    aws = aws.east
   }
 }
 ```
@@ -87,16 +81,16 @@ Managed Resources
 -----------------
 * `aws_cloudwatch_log_group.group`
 * `aws_cloudwatch_metric_alarm.error`
-* `aws_config_organization_custom_rule.sqs_encryption`
-* `aws_iam_policy.sqs_encryption`
+* `aws_config_organization_custom_rule.cloudfront_logging`
+* `aws_iam_policy.lambda_policy`
 * `aws_iam_role_policy_attachment.default`
 * `aws_lambda_function.default`
 * `aws_lambda_permission.lambda_permission`
 
 Data Resources
 --------------
-* `data.archive_file.sqs_encryption`
-* `data.aws_iam_policy_document.sqs_encryption_lambda`
+* `data.archive_file.lambda_package`
+* `data.aws_iam_policy_document.lambda_policy_doc`
 * `data.aws_iam_role.org_lambda_role`
 * `data.aws_region.current`
 

@@ -28,3 +28,17 @@ module "aggregator_role_label" {
   team        = local.team
   attributes  = ["org", "role"]
 }
+
+module "org_lambda_role_label" {
+  source      = "../../../modules/base/null-label/v2"
+  environment = "audit"
+  role_name   = local.role_name
+  attributes  = ["org", "lambda", "role"]
+}
+
+module "org_lambda_cross_account_role_label" {
+  source      = "../../../modules/base/null-label/v2"
+  environment = "audit"
+  role_name   = local.role_name
+  attributes  = ["org", "cross", "account", "role"]
+}

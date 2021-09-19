@@ -1,6 +1,6 @@
-# sqs_encryption
+# ami_check
 
-A Terraform module to deploy a custom AWS Config rule to check whether SQS queue has encryption at rest enabled..
+A Terraform module to deploy a custom AWS Config rule to check for AMI compliance.
 
 ## Information
 
@@ -16,14 +16,14 @@ A Terraform module to deploy a custom AWS Config rule to check whether SQS queue
 
 ## Accepted parameters
 
-* QueueNameStartsWith - (Optional) Specify your SQS queue names to check for. Starting SQS queue names will suffice. For example, your SQS queue names are "processimages" and "extractdocs".
+None
 
 ## Examples
 
 Deploy a custom Config Rule with a overriden maximum execution frequency (Default is `TwentyFour_Hours`):
 ```
-module "sqs_encryption" {
-  source = "./rules/sqs_encryption"
+module "ami_check" {
+  source = "./rules/ami_check"
 
   maximum_execution_frequency = "One_Hour"
   exclude_accounts            = []
@@ -34,15 +34,19 @@ module "sqs_encryption" {
   org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
 
   input_parameters = {
-    "QueueNameStartsWith" = null
+      "AmiAccountId"    = var.aws_account_map.ops
+      "AmiBakeTimeDays" = local.ami_bake_time_days
+      "AmiPrefixes"     = local.ami_prefixes
+      "WhitelistedAmis" = local.whitelisted_amis
+      "ExecutionRoleName" = ""
   }
 }
 ```
 
 Deploy a custom Config Rule to our second supported region `us-east-1`:
 ```
-module "sqs_encryption_east" {
-  source = "./rules/sqs_encryption"
+module "ami_check_east" {
+  source = "./rules/ami_check"
 
   maximum_execution_frequency = "TwentyFour_Hours"
   exclude_accounts            = []
@@ -53,11 +57,15 @@ module "sqs_encryption_east" {
   org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
 
   input_parameters = {
-    "QueueNameStartsWith" = null
+      "AmiAccountId"    = var.aws_account_map.ops
+      "AmiBakeTimeDays" = local.ami_bake_time_days
+      "AmiPrefixes"     = local.ami_prefixes
+      "WhitelistedAmis" = local.whitelisted_amis
+      "ExecutionRoleName" = ""
   }
 
   providers = {
-    aws         = aws.east
+    aws = aws.east
   }
 }
 ```
@@ -87,16 +95,16 @@ Managed Resources
 -----------------
 * `aws_cloudwatch_log_group.group`
 * `aws_cloudwatch_metric_alarm.error`
-* `aws_config_organization_custom_rule.sqs_encryption`
-* `aws_iam_policy.sqs_encryption`
+* `aws_config_organization_custom_rule.ami_check`
+* `aws_iam_policy.lambda_policy`
 * `aws_iam_role_policy_attachment.default`
 * `aws_lambda_function.default`
 * `aws_lambda_permission.lambda_permission`
 
 Data Resources
 --------------
-* `data.archive_file.sqs_encryption`
-* `data.aws_iam_policy_document.sqs_encryption_lambda`
+* `data.archive_file.lambda_package`
+* `data.aws_iam_policy_document.lambda_policy_doc`
 * `data.aws_iam_role.org_lambda_role`
 * `data.aws_region.current`
 

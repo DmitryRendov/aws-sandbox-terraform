@@ -1,6 +1,7 @@
-# sqs_encryption
+# alb_http_to_https_redirection
 
-A Terraform module to deploy a custom AWS Config rule to check whether SQS queue has encryption at rest enabled..
+A Terraform module to configure a custom AWS Config rule to check Checks whether HTTP to HTTPS redirection is configured on all HTTP listeners of Application Load Balancers.
+The rule in NON_COMPLIANT if one or more HTTP listener of an Application Load Balancer do not have HTTP to HTTPS redirection configured.
 
 ## Information
 
@@ -9,21 +10,25 @@ A Terraform module to deploy a custom AWS Config rule to check whether SQS queue
 
 ## ORG Config rules
 
-* Please note, that every Custom ORG Config rules use a shared IAM roles, created in this role and passed to every custom Config rule. Is used two IAM roles:
-  * `audit-aws-config-org-lambda-role` - the IAM role to run custom Lambda functions
-  * `audit-aws-config-reporter-cross-account` - the IAM role that custom Lambda function can assume in other AWS accounts
-* When developing new Custom ORG Config rules make sure that it uses "ExecutionRoleName" is set as `audit-aws-config-reporter-cross-account` and run under this role. Otherwise, your function won't work as expected.
+* Please note, that every Custom ORG Config rules should use shared IAM roles are passed to every custom Config rule. Is used two IAM roles:
+  * `audit-aws-config-org-lambda-role` - the IAM role to run custom Lambda function;
+  * `audit-aws-config-reporter-cross-account` - the IAM role that custom Lambda function can assume in other AWS accounts.
+* When developing new Custom ORG Config rule make sure that it has "ExecutionRoleName" is set to `audit-aws-config-reporter-cross-account` and run under this role. Otherwise, your function won't work as expected.
 
-## Accepted parameters
+## Rule Parameters:
 
-* QueueNameStartsWith - (Optional) Specify your SQS queue names to check for. Starting SQS queue names will suffice. For example, your SQS queue names are "processimages" and "extractdocs".
+None.
+
+## Important notes
+
+> The rule ignores Internal Load Balancers.
 
 ## Examples
 
 Deploy a custom Config Rule with a overriden maximum execution frequency (Default is `TwentyFour_Hours`):
 ```
-module "sqs_encryption" {
-  source = "./rules/sqs_encryption"
+module "alb_http_to_https_redirection" {
+  source = "./rules/alb_http_to_https_redirection"
 
   maximum_execution_frequency = "One_Hour"
   exclude_accounts            = []
@@ -33,16 +38,13 @@ module "sqs_encryption" {
   org_lambda_role_id = aws_iam_role.org_lambda_role.id
   org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
 
-  input_parameters = {
-    "QueueNameStartsWith" = null
-  }
 }
 ```
 
 Deploy a custom Config Rule to our second supported region `us-east-1`:
 ```
-module "sqs_encryption_east" {
-  source = "./rules/sqs_encryption"
+module "alb_http_to_https_redirection_east" {
+  source = "./rules/alb_http_to_https_redirection"
 
   maximum_execution_frequency = "TwentyFour_Hours"
   exclude_accounts            = []
@@ -52,16 +54,11 @@ module "sqs_encryption_east" {
   org_lambda_role_id = aws_iam_role.org_lambda_role.id
   org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
 
-  input_parameters = {
-    "QueueNameStartsWith" = null
-  }
-
   providers = {
-    aws         = aws.east
+    aws = aws.east
   }
 }
 ```
-
 
 <!-- BEGINNING OF TERRAFORM-DOCS HOOK -->
 
@@ -87,16 +84,16 @@ Managed Resources
 -----------------
 * `aws_cloudwatch_log_group.group`
 * `aws_cloudwatch_metric_alarm.error`
-* `aws_config_organization_custom_rule.sqs_encryption`
-* `aws_iam_policy.sqs_encryption`
+* `aws_config_organization_custom_rule.alb_http_to_https_redirection`
+* `aws_iam_policy.lambda_policy`
 * `aws_iam_role_policy_attachment.default`
 * `aws_lambda_function.default`
 * `aws_lambda_permission.lambda_permission`
 
 Data Resources
 --------------
-* `data.archive_file.sqs_encryption`
-* `data.aws_iam_policy_document.sqs_encryption_lambda`
+* `data.archive_file.lambda_package`
+* `data.aws_iam_policy_document.lambda_policy_doc`
 * `data.aws_iam_role.org_lambda_role`
 * `data.aws_region.current`
 

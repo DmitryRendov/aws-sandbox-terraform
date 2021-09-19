@@ -1,5 +1,6 @@
 ##
-# ORG Custom Config Rule to check for SQS encryption compliance.
+# ORG Custom Config Rule to check whether Application Load Balancers
+# have CloudFront security groups attached.
 #
 data "aws_region" "current" {}
 
@@ -11,31 +12,33 @@ module "lambda_label" {
   source      = "../../../../../modules/base/null-label/v2"
   environment = "audit"
   role_name   = "aws-config"
-  attributes  = ["sqs", "encryption", data.aws_region.current.name]
+  attributes  = ["alb", "cdn", "sg", "attached", data.aws_region.current.name]
 }
 
 data "aws_iam_role" "org_lambda_role" {
   name = var.org_lambda_role_id
 }
 
-resource "aws_iam_policy" "sqs_encryption" {
+resource "aws_iam_policy" "lambda_policy" {
   name   = module.lambda_label.id
   path   = "/"
-  policy = data.aws_iam_policy_document.sqs_encryption_lambda.json
+  policy = data.aws_iam_policy_document.lambda_policy_doc.json
 }
 
 resource "aws_iam_role_policy_attachment" "default" {
   role       = var.org_lambda_cross_account_role_id
-  policy_arn = aws_iam_policy.sqs_encryption.arn
+  policy_arn = aws_iam_policy.lambda_policy.arn
+  depends_on = [
+    aws_iam_policy.lambda_policy
+  ]
 }
 
-data "aws_iam_policy_document" "sqs_encryption_lambda" {
+data "aws_iam_policy_document" "lambda_policy_doc" {
   statement {
-    sid = "SQSList"
+    sid = "EC2ELB"
     actions = [
-      "sqs:GetQueueAttributes",
-      "sqs:ListQueues",
-      "sqs:ListQueueTags",
+      "elasticloadbalancing:Describe*",
+      "ec2:DescribeSecurityGroups*"
     ]
     effect    = "Allow"
     resources = ["*"]
@@ -62,10 +65,10 @@ data "aws_iam_policy_document" "sqs_encryption_lambda" {
 }
 
 // TODO: Move source code to S3 bucket and CircleCI
-data "archive_file" "sqs_encryption" {
+data "archive_file" "lambda_package" {
   type        = "zip"
-  source_file = "${path.module}/files/sqs_encryption/sqs_encryption.py"
-  output_path = "${path.module}/files/sqs_encryption.zip"
+  source_file = "${path.module}/files/alb_have_cloudfront_sg_attached/alb_have_cloudfront_sg_attached.py"
+  output_path = "${path.module}/files/alb_have_cloudfront_sg_attached.zip"
 }
 
 resource "aws_lambda_permission" "lambda_permission" {
@@ -78,15 +81,15 @@ resource "aws_lambda_permission" "lambda_permission" {
 }
 
 resource "aws_lambda_function" "default" {
-  filename         = data.archive_file.sqs_encryption.output_path
+  filename         = data.archive_file.lambda_package.output_path
   function_name    = local.lambda_function_id
   role             = data.aws_iam_role.org_lambda_role.arn
-  handler          = "sqs_encryption.lambda_handler"
+  handler          = "alb_have_cloudfront_sg_attached.lambda_handler"
   memory_size      = 128
-  source_code_hash = data.archive_file.sqs_encryption.output_base64sha256
+  source_code_hash = data.archive_file.lambda_package.output_base64sha256
   runtime          = "python3.8"
   timeout          = 60
-  description      = "Lambda for Custom Config Rule to check for SQS encryption compliance."
+  description      = "Checks whether ALB have CloudFront security groups attached."
 
   environment {
     variables = {
@@ -99,15 +102,14 @@ resource "aws_lambda_function" "default" {
   }
 }
 
-
-resource "aws_config_organization_custom_rule" "sqs_encryption" {
+resource "aws_config_organization_custom_rule" "s3_bucket_encryption_custom" {
   depends_on = [
     aws_lambda_function.default
   ]
-  name                = "sqs_encryption"
+  name                = "alb_have_cloudfront_sg_attached"
   trigger_types       = ["ScheduledNotification"]
   lambda_function_arn = aws_lambda_function.default.arn
-  description         = "Check whether SQS queue has encryption at rest enabled."
+  description         = "Checks whether ALB have CloudFront security groups attached."
 
   maximum_execution_frequency = var.maximum_execution_frequency
   excluded_accounts           = var.exclude_accounts

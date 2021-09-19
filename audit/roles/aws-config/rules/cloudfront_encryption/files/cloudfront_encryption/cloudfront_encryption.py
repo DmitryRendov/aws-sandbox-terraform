@@ -1,11 +1,11 @@
-"""Check whether SQS queue has encryption at rest enabled."""
-# Forked from: https://github.com/awslabs/aws-config-rules/blob/master/python/SQS_ENCRYPTED_CHECK/EFS_ENCRYPTED_CHECK.py
+"""Checks whether your Amazon CloudFront Distributions use HTTPS to communicate with Origin via TLS v1.2. The rule returns NON_COMPLIANT if the 'Minimum Origin SSL Protocol' is not set to 'TLSv1.2' and Origin Protocol Policy is not 'HTTPS Only'.
+Note: This rule does not apply if you have an AWS S3 bucket configured as website endpoint because the S3 service does not support HTTPS connections in this particular configuration.
+"""
+# Based on https://github.com/awslabs/aws-config-rules/blob/master/python/CLOUDFRONT_VIEWER_POLICY_HTTPS/CLOUDFRONT_VIEWER_POLICY_HTTPS.py
 #
 # Trigger Type: Periodic checks
-# Scope of Changes: AWS::SQS::Queue
-# Accepted Parameters: QueueNameStartsWith
-#                        (Optional) Specify your SQS queue names to check for. Starting SQS queue names will suffice. For example, your SQS queue names are "processimages" and "extractdocs".
-#                                   You can specify process, extract as the value for QueueNameStartsWith
+# Scope of Changes: AWS::CloudFront::Distribution
+# Accepted Parameters: None
 # Your Lambda function execution role will need to have a policy that provides
 # the appropriate permissions. Here is a policy that you can consider.
 # You should validate this for your own environment.
@@ -15,7 +15,6 @@ import sys
 import datetime
 import boto3
 import botocore
-import logging
 
 try:
     import liblogging
@@ -27,7 +26,7 @@ except ImportError:
 ##############
 
 # Define the default resource to report to Config Rules
-DEFAULT_RESOURCE_TYPE = 'AWS::SQS::Queue'
+DEFAULT_RESOURCE_TYPE = 'AWS::CloudFront::Distribution'
 
 # Set to True to get the lambda to assume the Role attached on the Config Service (useful for cross-account).
 ASSUME_ROLE_MODE = True
@@ -35,56 +34,46 @@ ASSUME_ROLE_MODE = True
 # Other parameters (no change needed)
 CONFIG_ROLE_TIMEOUT_SECONDS = 900
 
+
 #############
 # Main Code #
 #############
 
+def get_distributions(cf):
+    distributions = []
+    paginator = cf.get_paginator('list_distributions')
+    for distributionlist in paginator.paginate():
+      if distributionlist['DistributionList']['Quantity'] > 0:
+        for distribution in distributionlist['DistributionList']['Items']:
+          distributions.append(distribution)
+    return distributions
+
 def evaluate_compliance(event, configuration_item, valid_rule_parameters):
     evaluations = []
-    yourqueues = []
-    check = {}
-    sqs = get_client('sqs', event)
-    if valid_rule_parameters:
-        yourqueues = valid_rule_parameters["QueueNameStartsWith"].split(",")
-        for queue in yourqueues:
-            caseinsensitivequeue = queue.lower()
-            response = sqs.list_queues(QueueNamePrefix=caseinsensitivequeue.strip())
-            if "QueueUrls" not in response.keys():
-                print("There are no SQS queues to check for.")
-                return None
-            for qurl in response["QueueUrls"]:
-                check = sqs.get_queue_attributes(QueueUrl=qurl, AttributeNames=['KmsMasterKeyId'],)
-                if "Attributes" in check.keys():
-                    evaluations.append(build_evaluation(qurl, 'COMPLIANT', event, annotation='SQS Queue URL is encrypted with KMS key: '+check["Attributes"]["KmsMasterKeyId"]))
-                else:
-                    evaluations.append(build_evaluation(qurl, 'NON_COMPLIANT', event, annotation='SQS Queue URL is not encrypted.'))
-    else:
-        # Checking all queues. Maximum number is 1000 queues.
-        response = sqs.list_queues()
-        if "QueueUrls" not in response.keys():
-            print("There are no SQS queues to check for.")
-            return None
-        for qurl in response["QueueUrls"]:
-            check = sqs.get_queue_attributes(QueueUrl=qurl, AttributeNames=['KmsMasterKeyId'],)
-            if "Attributes" in check.keys():
-                evaluations.append(build_evaluation(qurl, 'COMPLIANT', event, annotation='SQS Queue URL is encrypted with KMS key: '+check["Attributes"]["KmsMasterKeyId"]))
-            else:
-                evaluations.append(build_evaluation(qurl, 'NON_COMPLIANT', event, annotation='SQS Queue URL is not encrypted.'))
+    cf = get_client('cloudfront', event)
+    distributions = get_distributions(cf)
+    if not distributions:
+        print("There are no CloudFront Distribution to check for.")
+        evaluations.append(build_evaluation(event['accountId'], "NOT_APPLICABLE", event))
+        return evaluations
 
+    for distribution in distributions:
+        for origin in distribution['Origins']['Items']:
+            if 'CustomOriginConfig' in origin:
+                # Check that CloudFront connects Origin using HTTPS only.
+                if 'OriginProtocolPolicy' in origin['CustomOriginConfig'] and origin['CustomOriginConfig']['OriginProtocolPolicy'] == "https-only":
+                    # Check that CloudFront connects Origin via TLS v1.2.
+                    if 'Items' in origin['CustomOriginConfig']["OriginSslProtocols"] and "TLSv1.2" in origin['CustomOriginConfig']["OriginSslProtocols"]["Items"]:
+                        evaluations.append(build_evaluation(distribution['Id'], 'COMPLIANT', event, annotation='''CloudFront Distribution {} has proper Origin configured'''.format(origin["Id"])))
+                    else:
+                        evaluations.append(build_evaluation(distribution['Id'], 'NON_COMPLIANT', event, annotation='''CloudFront "{}" should connect Origin using HTTPS TLS v1.2 and higher!'''.format(origin["Id"])))
+                else:
+                     evaluations.append(build_evaluation(distribution['Id'], 'NON_COMPLIANT', event, annotation='''CloudFront "{}" should connect Origin using HTTPS only!'''.format(origin["Id"])))
     return evaluations
 
 def evaluate_parameters(rule_parameters):
-    try:
-        valid_rule_parameters = ""
-        if rule_parameters["QueueNameStartsWith"] != "" and isinstance(rule_parameters["QueueNameStartsWith"], str):
-            valid_rule_parameters = rule_parameters
-        else:
-            print("Please specify a valid starting SQS queue name or multiple queue names separated by comma(,)")
-        return valid_rule_parameters
-    except LookupError:
-        print("Please input QueueNameStartsWith as the key.")
-
-
+    valid_rule_parameters = rule_parameters
+    return valid_rule_parameters
 
 ####################
 # Helper Functions #
@@ -171,6 +160,7 @@ def get_execution_role_arn(event):
         if role_name:
             execution_role_prefix = event["executionRoleArn"].split("/")[0]
             role_arn = "{}/{}".format(execution_role_prefix, role_name)
+
     if not role_arn:
         role_arn = event['executionRoleArn']
 

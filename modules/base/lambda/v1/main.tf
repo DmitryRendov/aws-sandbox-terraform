@@ -11,7 +11,7 @@ locals {
 }
 
 module "label" {
-  source      = "../../../../modules/base/null-label/v1"
+  source      = "../../../../modules/base/null-label/v2"
   environment = var.environment
   role_name   = var.role_name
   attributes  = var.attributes
