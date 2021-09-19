@@ -89,8 +89,6 @@ module "s3_bucket_encryption_custom_east" {
   }
 }
 
-
-
 module "sqs_encryption" {
   count  = local.config_enabled ? 1 : 0
   source = "./rules/sqs_encryption"
@@ -127,4 +125,124 @@ module "sqs_encryption_east" {
   providers = {
     aws = aws.west
   }
+}
+
+module "ami_check" {
+  count  = local.config_enabled ? 1 : 0
+  source = "./rules/ami_check"
+
+  maximum_execution_frequency = local.default_execution_frequency
+  exclude_accounts            = local.exclude_accounts
+  aws_account_map             = var.aws_account_map
+  aws_account_ids             = distinct(values(var.aws_account_map))
+
+  org_lambda_role_id               = aws_iam_role.org_lambda_role.id
+  org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
+
+  input_parameters = {
+    "AmiAccountId"      = var.aws_account_map.bastion
+    "AmiBakeTimeDays"   = local.ami_bake_time_days
+    "AmiPrefixes"       = local.ami_prefixes
+    "WhitelistedAmis"   = local.whitelisted_amis
+    "ExecutionRoleName" = ""
+  }
+
+}
+
+module "ami_check_east" {
+  count  = local.config_enabled ? 1 : 0
+  source = "./rules/ami_check"
+
+  maximum_execution_frequency = local.default_execution_frequency
+  exclude_accounts            = local.exclude_accounts
+  aws_account_map             = var.aws_account_map
+  aws_account_ids             = distinct(values(var.aws_account_map))
+
+  org_lambda_role_id               = aws_iam_role.org_lambda_role.id
+  org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
+
+  input_parameters = {
+    "AmiAccountId"      = var.aws_account_map.bastion
+    "AmiBakeTimeDays"   = local.ami_bake_time_days
+    "AmiPrefixes"       = local.ami_prefixes
+    "WhitelistedAmis"   = local.whitelisted_amis
+    "ExecutionRoleName" = ""
+  }
+
+  providers = {
+    aws = aws.west
+  }
+}
+
+module "cloudfront_encryption" {
+  count  = local.config_enabled ? 1 : 0
+  source = "./rules/cloudfront_encryption"
+
+  maximum_execution_frequency = local.default_execution_frequency
+  exclude_accounts            = local.exclude_accounts
+  aws_account_map             = var.aws_account_map
+  aws_account_ids             = distinct(values(var.aws_account_map))
+
+  org_lambda_role_id               = aws_iam_role.org_lambda_role.id
+  org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
+}
+
+module "cloudfront_encryption_east" {
+  count  = local.config_enabled ? 1 : 0
+  source = "./rules/cloudfront_encryption"
+
+  maximum_execution_frequency = local.default_execution_frequency
+  exclude_accounts            = local.exclude_accounts
+  aws_account_map             = var.aws_account_map
+  aws_account_ids             = distinct(values(var.aws_account_map))
+
+  org_lambda_role_id               = aws_iam_role.org_lambda_role.id
+  org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
+
+  providers = {
+    aws = aws.west
+  }
+}
+
+module "cloudfront_logging" {
+  count  = local.config_enabled ? 1 : 0
+  source = "./rules/cloudfront_logging"
+
+  maximum_execution_frequency = local.default_execution_frequency
+  exclude_accounts            = local.exclude_accounts
+  aws_account_map             = var.aws_account_map
+  aws_account_ids             = distinct(values(var.aws_account_map))
+
+  org_lambda_role_id               = aws_iam_role.org_lambda_role.id
+  org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
+}
+
+module "cloudfront_logging_east" {
+  count  = local.config_enabled ? 1 : 0
+  source = "./rules/cloudfront_logging"
+
+  maximum_execution_frequency = local.default_execution_frequency
+  exclude_accounts            = local.exclude_accounts
+  aws_account_map             = var.aws_account_map
+  aws_account_ids             = distinct(values(var.aws_account_map))
+
+  org_lambda_role_id               = aws_iam_role.org_lambda_role.id
+  org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
+
+  providers = {
+    aws = aws.west
+  }
+}
+
+module "ec2_instance_role_attached" {
+  count  = local.config_enabled ? 1 : 0
+  source = "./rules/ec2_instance_role_attached"
+
+  maximum_execution_frequency = local.default_execution_frequency
+  exclude_accounts            = local.exclude_accounts
+  aws_account_map             = var.aws_account_map
+  aws_account_ids             = distinct(values(var.aws_account_map))
+
+  org_lambda_role_id               = aws_iam_role.org_lambda_role.id
+  org_lambda_cross_account_role_id = module.org_lambda_cross_account_role_label.id
 }
