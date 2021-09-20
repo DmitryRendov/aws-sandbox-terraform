@@ -29,4 +29,5 @@ setup:
 	@pip3 install --user -U -r $(TF_ROOT)/lib/requirements.txt
 	@which pre-commit || sudo pip3 install pre-commit && pre-commit install
 	@GO111MODULE="on" go install github.com/hashicorp/terraform-config-inspect@latest
+	@GO111MODULE="on" go install github.com/terraform-docs/terraform-docs@v0.15.0
 	@which terraform-config-inspect || (echo "Please ensure your GOPATH is setup and it is in your PATH" && exit 1)
