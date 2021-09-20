@@ -26,7 +26,7 @@ upgrade-module:
 setup:
 	@which go || (echo "Setup go using this doc: https://golang.org/doc/install and run this script again" && exit 1)
 	@which pip3 || dnf install pip3
-	@pip3 install --user -U -r $(TF_ROOT)/terraform/lib/requirements.txt
-	@which pre-commit || pip3 install pre-commit && pre-commit install
-	@GO111MODULE="on" go get -u github.com/hashicorp/terraform-config-inspect
+	@pip3 install --user -U -r $(TF_ROOT)/lib/requirements.txt
+	@which pre-commit || sudo pip3 install pre-commit && pre-commit install
+	@GO111MODULE="on" go install github.com/hashicorp/terraform-config-inspect@latest
 	@which terraform-config-inspect || (echo "Please ensure your GOPATH is setup and it is in your PATH" && exit 1)
