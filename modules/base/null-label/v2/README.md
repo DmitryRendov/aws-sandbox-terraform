@@ -17,7 +17,7 @@ These tags are created by default:
 > Multiple different kind of resources
 ```hcl
 module "label" {
-  source      = "../../../modules/base/null-label/v1"
+  source      = "../../../modules/base/null-label/v2"
   role_name   = "${local.role_name}"
   environment = "${local.env}"
 }
@@ -25,14 +25,14 @@ module "label" {
 > Multiple different resources of the SAME kind
 ```hcl
 module "audio_label" {
-  source      = "../../../modules/base/null-label/v1"
+  source      = "../../../modules/base/null-label/v2"
   role_name   = "${local.role_name}"
   environment = "${local.env}"
   attributes  = ["audio"]
 }
 
 module "video_label" {
-  source      = "../../../modules/base/null-label/v1"
+  source      = "../../../modules/base/null-label/v2"
   role_name   = "${local.role_name}"
   environment = "${local.env}"
   attributes  = ["video"]
