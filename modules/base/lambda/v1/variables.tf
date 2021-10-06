@@ -42,6 +42,12 @@ variable "memory_size" {
   default     = 512
 }
 
+variable "publish" {
+  description = "Whether to publish creation/change as new Lambda Function Version"
+  type        = bool
+  default     = false
+}
+
 variable "s3_bucket" {
   description = "Amazon S3 bucket name where the .zip file containing your deployment package is stored"
   default     = null
@@ -97,7 +103,8 @@ variable "variables" {
 
 variable "alarm_enabled" {
   description = "Create the Cloudwatch Alarm or not"
-  default     = "true"
+  default     = true
+  type        = bool
 }
 
 variable "alarm_actions" {
@@ -126,12 +133,12 @@ variable "treat_missing_data" {
   default     = "missing"
 }
 
-variable "enabled" {
-  description = "Set to false and no resources will be created"
-  type        = bool
-  default     = true
-}
-
 variable "description" {
   description = "Description of what your Lambda Function does."
+}
+
+variable "assume_role_trusted_services" {
+  description = "List of additional AWS services allowed to execute this Lambda"
+  type        = list(string)
+  default     = []
 }

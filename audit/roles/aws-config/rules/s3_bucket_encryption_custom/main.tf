@@ -9,9 +9,9 @@ locals {
 }
 
 module "lambda_label" {
-  source      = "../../../../../modules/base/null-label/v2"
+  source      = "../../../../../modules/base/label/v1"
   environment = "audit"
-  role_name   = "aws-config"
+  name        = "aws-config"
   attributes  = ["s3", "encryption", data.aws_region.current.name]
 }
 
