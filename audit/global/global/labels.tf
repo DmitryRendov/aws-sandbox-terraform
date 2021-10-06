@@ -1,12 +1,12 @@
 module "label" {
-  source      = "../../../modules/base/null-label/v2"
+  source      = "../../../modules/base/label/v1"
   environment = "audit"
-  role_name   = "global"
+  name        = "sandbox"
+  team        = local.team
 }
 
 module "aws_config_label" {
-  source      = "../../../modules/base/null-label/v2"
-  environment = "mob"
-  role_name   = "global"
-  attributes  = ["aws", "config"]
+  source     = "../../../modules/base/label/v1"
+  context    = module.label.context
+  attributes = ["aws", "config"]
 }
