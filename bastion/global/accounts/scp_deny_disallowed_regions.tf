@@ -8,33 +8,45 @@ data "aws_iam_policy_document" "deny_disallowed_regions" {
 
     not_actions = [
       "a4b:*",
-      "artifact:*",
+      "acm:*",
+      "aws-marketplace-management:*",
+      "aws-marketplace:*",
       "aws-portal:*",
+      "awsbillingconsole:*",
       "budgets:*",
       "ce:*",
       "chime:*",
       "cloudfront:*",
+      "config:*",
       "cur:*",
-      "datapipeline:GetAccountLimits",
       "directconnect:*",
+      "ec2:DescribeRegions",
+      "ec2:DescribeTransitGateways",
+      "ec2:DescribeVpnGateways",
+      "fms:*",
       "globalaccelerator:*",
       "health:*",
       "iam:*",
       "importexport:*",
+      "kms:*",
       "mobileanalytics:*",
+      "networkmanager:*",
       "organizations:*",
-      "resource-groups:*",
+      "pricing:*",
       "route53:*",
       "route53domains:*",
-      "s3:GetBucketLocation",
+      "s3:GetAccountPublic*",
       "s3:ListAllMyBuckets",
+      "s3:ListBuckets",
+      "s3:PutAccountPublic*",
       "shield:*",
-      "support:*",
-      "tag:*",
-      "trustedadvisor:*",
-      "waf:*",
-      "wellarchitected:*",
       "sts:*",
+      "support:*",
+      "trustedadvisor:*",
+      "waf-regional:*",
+      "waf:*",
+      "wafv2:*",
+      "wellarchitected:*",
     ]
 
     resources = ["*"]
@@ -55,28 +67,4 @@ resource "aws_organizations_policy" "deny_disallowed_regions" {
   description = "Allow access to any operations only within the specified regions."
 
   content = data.aws_iam_policy_document.deny_disallowed_regions.json
-}
-
-# This is to restrict deletion of non-current version of objects in all S3 buckets
-data "aws_iam_policy_document" "s3_deny_version_deletion" {
-  statement {
-    sid = "DenyDeleteS3VersionedObjects"
-
-    actions = [
-      "s3:DeleteObjectVersion",
-      "s3:DeleteObjectVersionTagging"
-    ]
-
-    resources = ["*"]
-
-    effect = "Deny"
-
-  }
-}
-
-resource "aws_organizations_policy" "s3_deny_version_deletion" {
-  name        = "DisableIAMS3DeleteNonCurrentVersions"
-  description = "Disable ability to delete non-current versions of S3 objects."
-
-  content = data.aws_iam_policy_document.s3_deny_version_deletion.json
 }
