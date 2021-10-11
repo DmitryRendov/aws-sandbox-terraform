@@ -15,7 +15,7 @@ module "aliaksei_kliashchonak" {
   name   = "aliaksei_kliashchonak"
 
   audit_policy_arns   = ["arn:aws:iam::aws:policy/PowerUserAccess"]
-  bastion_policy_arns = ["arn:aws:iam::aws:policy/AWSReadOnlyAccess"]
+  bastion_policy_arns = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
 
   providers = {
     aws.audit = aws.audit
@@ -26,11 +26,10 @@ module "mikhail_parkun" {
   source = "../../../modules/user-roles/v1"
   name   = "mikhail_parkun"
 
-  audit_policy_arns   = ["arn:aws:iam::aws:policy/AWSReadOnlyAccess"]
-  bastion_policy_arns = ["arn:aws:iam::aws:policy/AWSReadOnlyAccess"]
+  audit_policy_arns   = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+  bastion_policy_arns = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
 
   providers = {
     aws.audit = aws.audit
   }
 }
-  
