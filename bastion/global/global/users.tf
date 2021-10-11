@@ -10,13 +10,27 @@ module "dmitry_rendov" {
   }
 }
 
-module "mikhail_parkun" {
+module "aliaksei_kliashchonak" {
   source = "../../../modules/user-roles/v1"
-  name   = "mikhail_parkun"
+  name   = "aliaksei_kliashchonak"
 
-  audit_policy_arns = ["arn:aws:iam::aws:policy/AWSReadOnlyAccess"]
+  audit_policy_arns   = ["arn:aws:iam::aws:policy/PowerUserAccess"]
+  bastion_policy_arns = ["arn:aws:iam::aws:policy/AWSReadOnlyAccess"]
 
   providers = {
     aws.audit = aws.audit
   }
 }
+
+module "mikhail_parkun" {
+  source = "../../../modules/user-roles/v1"
+  name   = "mikhail_parkun"
+
+  audit_policy_arns   = ["arn:aws:iam::aws:policy/AWSReadOnlyAccess"]
+  bastion_policy_arns = ["arn:aws:iam::aws:policy/AWSReadOnlyAccess"]
+
+  providers = {
+    aws.audit = aws.audit
+  }
+}
+  

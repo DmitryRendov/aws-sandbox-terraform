@@ -1,12 +1,11 @@
 module "label" {
-  source      = "../../null-label/v1"
+  source      = "../../label/v1"
   environment = var.environment
-  role_name   = var.role_name
+  name        = var.role_name
 }
 
 module "config_label" {
-  source      = "../../null-label/v1"
-  environment = var.environment
-  role_name   = var.role_name
-  attributes  = ["config", "recorder", data.aws_region.current.name]
+  source     = "../../label/v1"
+  context    = module.label.context
+  attributes = ["config", "recorder", data.aws_region.current.name]
 }
