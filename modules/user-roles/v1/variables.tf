@@ -14,8 +14,8 @@ variable "teams" {
 
 variable "bastion_policy_arns" {
   type        = set(string)
-  default     = ["arn:aws:iam::aws:policy/AdministratorAccess"]
-  description = "List of policy arns to attach to the user for the Bastion Account. Default: AdministratorAccess"
+  default     = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+  description = "List of policy arns to attach to the user for the Bastion Account. Default: ReadOnlyAccess"
 }
 
 variable "audit_policy_arns" {
