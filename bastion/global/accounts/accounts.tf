@@ -20,6 +20,7 @@ module "audit" {
   name   = "audit"
   scp_policies = [
     aws_organizations_policy.deny_disallowed_regions.id,
+    aws_organizations_policy.immutable_admin_role.id,
   ]
 }
 
@@ -29,6 +30,7 @@ module "bastion" {
   email  = local.email
   scp_policies = [
     aws_organizations_policy.deny_disallowed_regions.id,
+    aws_organizations_policy.immutable_admin_role.id,
   ]
 }
 
@@ -37,6 +39,7 @@ module "production" {
   name   = "production"
   scp_policies = [
     aws_organizations_policy.deny_disallowed_regions.id,
+    aws_organizations_policy.immutable_admin_role.id,
   ]
 }
 
