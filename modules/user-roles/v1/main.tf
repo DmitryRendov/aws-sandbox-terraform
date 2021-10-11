@@ -50,6 +50,9 @@ resource "aws_iam_user_policy_attachment" "support_user_policy" {
   policy_arn = each.value
 }
 
+##
+# Audit account
+#
 resource "aws_iam_role" "audit_user_role" {
   count              = signum(length(var.audit_policy_arns))
   provider           = aws.audit
@@ -65,6 +68,9 @@ resource "aws_iam_role_policy_attachment" "audit_user_policy" {
   policy_arn = each.value
 }
 
+##
+# Bastion account
+#
 resource "aws_iam_role" "bastion_user_role" {
   count              = signum(length(var.bastion_policy_arns))
   name               = var.name
@@ -75,5 +81,23 @@ resource "aws_iam_role" "bastion_user_role" {
 resource "aws_iam_role_policy_attachment" "bastion_user_policy" {
   for_each   = var.bastion_policy_arns
   role       = aws_iam_role.bastion_user_role[0].name
+  policy_arn = each.value
+}
+
+##
+# Production account
+#
+resource "aws_iam_role" "production_user_role" {
+  count              = signum(length(var.production_policy_arns))
+  provider           = aws.production
+  name               = var.name
+  assume_role_policy = data.aws_iam_policy_document.assumerole_policy.json
+  tags               = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "production_user_policy" {
+  for_each   = var.bastion_policy_arns
+  provider   = aws.production
+  role       = aws_iam_role.production_user_role[0].name
   policy_arn = each.value
 }
