@@ -18,13 +18,13 @@ resource "aws_iam_user" "user" {
   tags          = local.tags
 }
 
-data "aws_iam_group" "mob_user" {
-  group_name = "mob_user"
+data "aws_iam_group" "sandbox" {
+  group_name = "sandbox"
 }
 
-resource "aws_iam_user_group_membership" "mob_user" {
+resource "aws_iam_user_group_membership" "sandbox" {
   user   = aws_iam_user.user.name
-  groups = [data.aws_iam_group.mob_user.group_name]
+  groups = [data.aws_iam_group.sandbox.group_name]
 }
 
 resource "aws_iam_policy" "assumerole" {
