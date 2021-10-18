@@ -65,10 +65,6 @@ resource "aws_iam_policy" "assumerole_all" {
   policy      = data.aws_iam_policy_document.assumerole_all.json
 }
 
-## Note: This has been duplicated into terraform-modules/aws/user-roles
-## This policy will need to remain until we can retire the groups we are
-## currently using.  This will happen after we communicate to engineering
-## the new method to access AWS
 data "aws_iam_policy_document" "force_mfa" {
   statement {
     sid = "AllowAllUsersToListAccounts"
@@ -201,80 +197,4 @@ resource "aws_iam_policy" "force_mfa" {
   name        = "ForceMFA"
   description = "Forces a user to use a MFA for all actions except managing their own MFA"
   policy      = data.aws_iam_policy_document.force_mfa.json
-}
-
-data "aws_iam_policy_document" "cicd" {
-  statement {
-    sid = "1"
-
-    actions = [
-      "sts:AssumeRole",
-    ]
-
-    resources = [
-      "arn:aws:iam::*:role/cicd*",
-    ]
-  }
-
-  statement {
-    sid = "2"
-
-    actions = [
-      "sts:GetSessionToken",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-}
-
-resource "aws_iam_policy" "assumerole_cicd" {
-  name        = "${var.environment}-assumerole-cicd"
-  description = "Grants our CI/CD ability to assome role in our accounts"
-  policy      = data.aws_iam_policy_document.cicd.json
-}
-
-data "aws_iam_policy_document" "assumerole_developers" {
-  statement {
-    sid = "1"
-
-    actions = [
-      "sts:AssumeRole",
-    ]
-
-    resources = [
-      "arn:aws:iam::${var.aws_account_map["production"]}:role/super-user",
-    ]
-
-    condition {
-      test     = "Null"
-      variable = "aws:MultiFactorAuthAge"
-      values   = ["false"]
-    }
-
-    condition {
-      test     = "NumericLessThan"
-      variable = "aws:MultiFactorAuthAge"
-      values   = ["43200"]
-    }
-  }
-
-  statement {
-    sid = "2"
-
-    actions = [
-      "sts:GetSessionToken",
-    ]
-
-    resources = [
-      "*",
-    ]
-  }
-}
-
-resource "aws_iam_policy" "assumerole_developers" {
-  name        = "${var.environment}-assumerole-developers"
-  description = "Grants a user the ability to assume developers roles and fetch session tokens"
-  policy      = data.aws_iam_policy_document.assumerole_developers.json
 }
