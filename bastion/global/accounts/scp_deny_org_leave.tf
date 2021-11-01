@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "deny_org_leave" {
   }
 }
 
-resource "aws_organizations_policy" "immutable_admin_role" {
+resource "aws_organizations_policy" "deny_org_leave" {
   name        = "DenyOrgLeave"
   description = "Deny ability to leave Organization"
 
