@@ -15,6 +15,11 @@ output "org" {
   value = aws_organizations_organization.mob
 }
 
+resource "aws_organizations_policy_attachment" "root" {
+  policy_id = aws_organizations_policy.deny_org_leave.id
+  target_id = aws_organizations_organization.mob.roots[0].id
+}
+
 module "audit" {
   source = "../../../modules/base/aws-organization-account/v2"
   name   = "audit"
