@@ -39,3 +39,17 @@ module "mikhail_parkun" {
     aws.production = aws.production
   }
 }
+
+module "ilya_melnik" {
+  source = "../../../modules/user-roles/v1"
+  name   = "ilya_melnik"
+
+  audit_policy_arns      = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+  bastion_policy_arns    = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+  production_policy_arns = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+
+  providers = {
+    aws.audit      = aws.audit
+    aws.production = aws.production
+  }
+}
