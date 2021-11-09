@@ -5,7 +5,7 @@ username={{USERNAME}}
 akid={{AKID}}
 secret={{SECRET}}
 
-required_commands="aws jq python3 aws-bastion.sh"
+required_commands="aws jq python3 aws-login.sh"
 
 for required_command in $required_commands; do
     command -v "$required_command" > /dev/null || { >&2 echo "$required_command is not installed, please follow our docs in the Teams group"; exit 1; }
