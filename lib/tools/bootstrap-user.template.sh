@@ -5,7 +5,7 @@ username={{USERNAME}}
 akid={{AKID}}
 secret={{SECRET}}
 
-required_commands="aws jq python3 aws-bastion.sh"
+required_commands="aws jq python3 aws-login.sh"
 
 for required_command in $required_commands; do
     command -v "$required_command" > /dev/null || { >&2 echo "$required_command is not installed, please follow our docs in the Teams group"; exit 1; }
@@ -74,7 +74,7 @@ sleep 5
 echo You can use whatever token your 2FA app shows, no need to wait for a new token like we did before.
 sleep 5
 
-aws-bastion.sh login
+aws-login.sh login
 
 aws --profile sts iam create-login-profile --user-name $username --password "$consolepw" --no-password-reset-required || echo "Console password setting failed, probably didn't meet minimum standards. You can try again later using the CLI http://docs.aws.amazon.com/cli/latest/reference/iam/create-login-profile.html"
 
