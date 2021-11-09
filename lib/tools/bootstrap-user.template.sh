@@ -74,7 +74,7 @@ sleep 5
 echo You can use whatever token your 2FA app shows, no need to wait for a new token like we did before.
 sleep 5
 
-aws-bastion.sh login
+aws-login.sh login
 
 aws --profile sts iam create-login-profile --user-name $username --password "$consolepw" --no-password-reset-required || echo "Console password setting failed, probably didn't meet minimum standards. You can try again later using the CLI http://docs.aws.amazon.com/cli/latest/reference/iam/create-login-profile.html"
 
