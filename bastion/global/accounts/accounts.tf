@@ -25,14 +25,14 @@ locals {
 }
 
 resource "aws_organizations_policy_attachment" "root_scp_policies" {
-  count     = length(local.root_scp_policies) 
+  count     = length(local.root_scp_policies)
   policy_id = element(local.root_scp_policies, count.index)
   target_id = aws_organizations_organization.mob.roots[0].id
 }
 
 module "audit" {
-  source = "../../../modules/base/aws-organization-account/v2"
-  name   = "audit"
+  source       = "../../../modules/base/aws-organization-account/v2"
+  name         = "audit"
   scp_policies = [] // Unique account SCPs can be added here
 }
 
@@ -44,8 +44,8 @@ module "bastion" {
 }
 
 module "production" {
-  source = "../../../modules/base/aws-organization-account/v2"
-  name   = "production"
+  source       = "../../../modules/base/aws-organization-account/v2"
+  name         = "production"
   scp_policies = [] // Unique account SCPs can be added here
 }
 
