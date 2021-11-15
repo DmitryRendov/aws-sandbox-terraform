@@ -16,8 +16,8 @@ output "org" {
 }
 
 resource "aws_organizations_policy_attachment" "root_scp_policies" {
-  for_each  = toset(local.root_scp_policies)
-  policy_id = each.key
+  count     = length(local.root_scp_policies)
+  policy_id = element(local.root_scp_policies, count.index)
   target_id = aws_organizations_organization.mob.roots[0].id
 }
 
