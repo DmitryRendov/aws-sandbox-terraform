@@ -7,4 +7,5 @@ variable "allowed_regions" {
 variable "protected_iam_roles" {
   description = "List of roles that are not allowed to modify"
   type        = list(string)
+  default     = ["arn:aws:iam::*:role/super-user"]
 }

@@ -15,18 +15,9 @@ output "org" {
   value = aws_organizations_organization.mob
 }
 
-locals {
-  root_scp_policies = [
-    aws_organizations_policy.deny_disallowed_regions.id,
-    aws_organizations_policy.immutable_admin_role.id,
-    aws_organizations_policy.protect_iam_roles.id,
-    aws_organizations_policy.deny_root_access.id,
-  ]
-}
-
 resource "aws_organizations_policy_attachment" "root_scp_policies" {
-  count     = length(local.root_scp_policies)
-  policy_id = element(local.root_scp_policies, count.index)
+  for_each  = toset(local.root_scp_policies)
+  policy_id = each.key
   target_id = aws_organizations_organization.mob.roots[0].id
 }
 
