@@ -4,3 +4,11 @@ module "label" {
   name        = local.role_name
   team        = local.team
 }
+
+module "developer_label" {
+  source      = "../../../modules/base/label/v1"
+  context     = module.label.context
+  environment = "production"
+  name        = "developer"
+  attributes  = ["policy"]
+}

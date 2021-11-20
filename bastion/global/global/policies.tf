@@ -198,3 +198,65 @@ resource "aws_iam_policy" "force_mfa" {
   description = "Forces a user to use a MFA for all actions except managing their own MFA"
   policy      = data.aws_iam_policy_document.force_mfa.json
 }
+
+data "aws_iam_policy_document" "developer_permissions" {
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "lambda:InvokeFunction",
+    ]
+
+    not_resources = [
+      "arn:aws:lambda:*:*:function:aws-sandbox-serverless*",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "s3:Get*",
+      "s3:List*",
+      "s3:PutObject",
+      "s3:PutAclObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::sb-production-serverless*",
+      "arn:aws:s3:::sb-production-serverless*/*",
+    ]
+  }
+
+  statement {
+    actions   = ["ssm:*"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringLike"
+      variable = "ssm:ResourceTag/team"
+      values   = ["$${aws:PrincipalTag/team}"]
+    }
+
+    effect = "Allow"
+  }
+
+  statement {
+    actions   = ["ssm:*"]
+    resources = ["*"]
+
+    condition {
+      test     = "StringLike"
+      variable = "ssm:ResourceTag/username"
+      values   = ["$${aws:PrincipalTag/username}"]
+    }
+
+    effect = "Allow"
+  }
+}
+
+resource "aws_iam_policy" "developer_permissions" {
+  provider = aws.production
+  name     = module.developer_label.id
+  policy   = data.aws_iam_policy_document.developer_permissions.json
+}
