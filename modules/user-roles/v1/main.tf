@@ -96,7 +96,7 @@ resource "aws_iam_role" "production_user_role" {
 }
 
 resource "aws_iam_role_policy_attachment" "production_user_policy" {
-  for_each   = var.bastion_policy_arns
+  for_each   = var.production_policy_arns
   provider   = aws.production
   role       = aws_iam_role.production_user_role[0].name
   policy_arn = each.value
