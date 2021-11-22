@@ -60,7 +60,7 @@ module "arseni_dudko" {
 
   audit_policy_arns      = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
   bastion_policy_arns    = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
-  production_policy_arns = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+  production_policy_arns = local.developer_policies["developer_prod_policy_arns"]
 
   providers = {
     aws.audit      = aws.audit

@@ -135,6 +135,19 @@ data "aws_iam_policy_document" "serverless_policy_doc" {
     effect = "Allow"
 
     actions = [
+      "xray:AWSXrayWriteOnlyAccess",
+      "xray:PutTraceSegments",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
       "s3:GetObject",
       "s3:GetObjectVersion",
       "s3:PutObject",

@@ -9,20 +9,12 @@ locals {
 
 
   developer_policies = {
-    headspace_prod_policy_arns = [
-      "arn:aws:iam::aws:policy/AWSSupportAccess",
+    developer_prod_policy_arns = [
       "arn:aws:iam::aws:policy/ReadOnlyAccess",
-      #aws_iam_policy.developer_permissions.arn,
-      #aws_iam_policy.restrict_destructive_actions.arn,
+      aws_iam_policy.developer_permissions.arn,
+      data.terraform_remote_state.production_serverless.outputs.serverless_policy_arn,
     ]
   }
 
-  security_team_policies = {
-    headspace_prod_policy_arns = [
-      "arn:aws:iam::aws:policy/AWSSupportAccess",
-      "arn:aws:iam::aws:policy/ReadOnlyAccess",
-      #aws_iam_policy.deny_s3_archives.arn,
-    ]
-  }
 
 }
