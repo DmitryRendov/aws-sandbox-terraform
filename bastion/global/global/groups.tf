@@ -35,6 +35,7 @@ resource "aws_iam_group_membership" "developers" {
     module.mikhail_parkun.name,
     module.ilya_melnik.name,
     module.arseni_dudko.name,
+    module.valerii_baev.name,
   ]
 
   group = aws_iam_group.developers.name
