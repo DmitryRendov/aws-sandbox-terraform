@@ -135,6 +135,25 @@ data "aws_iam_policy_document" "serverless_policy_doc" {
     effect = "Allow"
 
     actions = [
+      "apigateway:GET",
+      "apigateway:POST",
+      "apigateway:PUT",
+      "apigateway:DELETE",
+      "apigateway:PATCH",
+      "apigateway:UpdateRestApiPolicy",
+    ]
+
+    resources = [
+      "arn:aws:apigateway:${var.region}:*:/restapis",
+      "arn:aws:apigateway:${var.region}:*:/restapis/*",
+      "arn:aws:apigateway:${var.region}:*:/tags/*",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
       "xray:AWSXrayWriteOnlyAccess",
       "xray:PutTraceSegments",
     ]
