@@ -119,6 +119,25 @@ data "aws_iam_policy_document" "logging_bucket" {
     }
   }
 
+  statement {
+    sid = "AccessFromOtherAccounts"
+
+    actions = [
+      "s3:*",
+    ]
+
+    principals {
+      type = "AWS"
+
+      identifiers = formatlist("arn:aws:iam::%s:root", sort(values(var.aws_account_map)))
+    }
+
+    resources = [
+      module.logging_bucket.arn,
+      "${module.logging_bucket.arn}/*",
+    ]
+  }
+
   dynamic "statement" {
     for_each = local.enforce_logging_bucket_tls ? [1] : []
 
