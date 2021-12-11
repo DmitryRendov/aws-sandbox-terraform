@@ -4,3 +4,10 @@ module "label" {
   name        = local.role_name
   team        = local.team
 }
+
+module "log_bucket_label" {
+  source     = "../../../modules/base/label/v1"
+  context    = module.label.context
+  name       = "log"
+  attributes = ["bucket"]
+}
