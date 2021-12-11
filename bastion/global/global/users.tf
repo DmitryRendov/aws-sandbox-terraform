@@ -72,7 +72,7 @@ module "valerii_baev" {
   source = "../../../modules/user-roles/v1"
   name   = "valerii_baev"
 
-  audit_policy_arns      = ["arn:aws:iam::aws:policy/PowerUserAccess"]
+  audit_policy_arns      = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
   bastion_policy_arns    = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
   production_policy_arns = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
 
