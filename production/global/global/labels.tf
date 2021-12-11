@@ -10,4 +10,9 @@ module "log_bucket_label" {
   context    = module.label.context
   name       = "log"
   attributes = ["bucket"]
+
+module "apigw_logs_label" {
+  source     = "../../../modules/base/label/v1"
+  context    = module.label.context
+  attributes = ["apigateway", "cloudwatch"]
 }
