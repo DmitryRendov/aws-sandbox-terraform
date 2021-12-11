@@ -21,8 +21,5 @@ resource "aws_route53_zone" "default" {
     }
   }
 
-  tags = merge(
-    lookup(each.value, "unique_tags", {}),
-    var.shared_tags
-  )
+  tags = var.label.tags
 }

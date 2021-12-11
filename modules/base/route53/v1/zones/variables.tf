@@ -11,8 +11,8 @@ variable "zones" {
   type        = list(any)
 }
 
-variable "shared_tags" {
-  description = "(Optional) Tags added to all zones."
+variable "label" {
+  description = "Label passed to the module."
   type        = any
   default     = {}
 }
