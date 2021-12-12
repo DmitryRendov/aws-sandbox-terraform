@@ -6,6 +6,10 @@ variable "hostname" {
   default = ""
 }
 
+variable "bucket_name" {
+  default = ""
+}
+
 variable "parent_zone_id" {
   description = "ID of the hosted zone to contain the record"
   default     = ""
