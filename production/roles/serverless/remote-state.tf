@@ -24,11 +24,11 @@ data "terraform_remote_state" "global" {
   }
 }
 
-data "terraform_remote_state" "global_infra" {
+data "terraform_remote_state" "route53" {
   backend = "s3"
 
   config = {
-    key          = "${var.account_name}/roles/global-infra"
+    key          = "${var.account_name}/global/route53"
     bucket       = var.terraform_remote_state_bucket
     region       = var.terraform_remote_state_region
     profile      = "sts"

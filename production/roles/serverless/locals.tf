@@ -15,5 +15,5 @@ locals {
   api_xray_tracing_enabled   = "false"
 
   # Hostname for serverless web-site (серверлесс.девопс.бел)
-  hostname = "xn--b1afba3a1acdha.${var.public_zone_name}"
+  hostname = "xn--b1afba3a1acdha.${data.terraform_remote_state.route53.outputs.zone_name}"
 }
