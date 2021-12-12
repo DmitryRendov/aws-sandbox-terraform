@@ -4,7 +4,7 @@
       "s3": {
         "bucket": "mob-terraform-state",
         "encrypt": "true",
-        "key": "production/roles/global-infra",
+        "key": "production/global/route53",
         "profile": "sts",
         "region": "us-east-1",
         "session_name": "terraform"
