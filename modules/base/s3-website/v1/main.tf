@@ -212,6 +212,7 @@ resource "aws_s3_bucket_public_access_block" "default" {
 
 module "dns" {
   source = "../../route53-alias/v1"
+  count  = var.hostname != "" ? 1 : 0
   aliases = compact(
     [
       signum(length(var.parent_zone_id)) == 1 || signum(length(var.parent_zone_name)) == 1 ? var.hostname : "",
