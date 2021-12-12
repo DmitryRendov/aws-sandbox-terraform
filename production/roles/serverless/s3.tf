@@ -17,6 +17,8 @@ module "website" {
   label  = module.website_label
 
   hostname           = local.hostname
+  parent_zone_id     = data.terraform_remote_state.route53.outputs.zone_id
+  parent_zone_name   = data.terraform_remote_state.route53.outputs.zone_name
   log_bucket         = data.terraform_remote_state.global.outputs.logging_bucket.id
   s3_logs_prefix     = "s3/${local.aws_account_id}"
   versioning_enabled = false
