@@ -80,7 +80,7 @@ resource "aws_api_gateway_integration_response" "public_api_gateway_mock_method_
 
   # Transforms the backend JSON response to XML
   response_templates = {
-    "application/json" = "{\"apiVersion\": ${local.api_version}, \"statusCode\": 200}"
+    "application/json" = "{\"apiVersion\": \"${local.api_version}\", \"statusCode\": \"200\"}"
   }
 }
 

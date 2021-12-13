@@ -119,6 +119,10 @@
       ],
       "description": "List of allowed networks."
     },
+    "public_zone_name": {
+      "default": "xn--b1add1bfm.xn--90ais",
+      "description": "Name of public domain."
+    },
     "terraform_exec_role": {
       "default": "super-user",
       "description": "Default role to create terraform resources"
