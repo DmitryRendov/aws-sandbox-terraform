@@ -62,9 +62,3 @@ data "aws_iam_policy_document" "deny_disallowed_regions" {
   }
 }
 
-resource "aws_organizations_policy" "deny_disallowed_regions" {
-  name        = "DenyAllRegionsExceptAreInUse"
-  description = "Allow access to any operations only within the specified regions."
-
-  content = data.aws_iam_policy_document.deny_disallowed_regions.json
-}
