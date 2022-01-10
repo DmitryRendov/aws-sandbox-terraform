@@ -15,8 +15,3 @@ data "aws_iam_policy_document" "protect_iam_roles" {
   }
 }
 
-resource "aws_organizations_policy" "protect_iam_roles" {
-  name        = "ProtectIAMRoles"
-  description = "Deny ability to modify IAM Roles"
-  content     = data.aws_iam_policy_document.protect_iam_roles.json
-}

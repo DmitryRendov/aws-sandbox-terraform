@@ -34,9 +34,3 @@ data "aws_iam_policy_document" "immutable_admin_role" {
   }
 }
 
-resource "aws_organizations_policy" "immutable_admin_role" {
-  name        = "MakeAdminRoleImmutable"
-  description = "Prevent IAM users and roles from making specified changes."
-
-  content = data.aws_iam_policy_document.immutable_admin_role.json
-}
