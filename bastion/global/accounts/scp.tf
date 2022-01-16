@@ -9,6 +9,7 @@ data "aws_iam_policy_document" "scp" {
     data.aws_iam_policy_document.deny_org_leave.json,
     data.aws_iam_policy_document.immutable_admin_role.json,
     data.aws_iam_policy_document.protect_iam_roles.json,
+    data.aws_iam_policy_document.security_settings.json,
   ]
 }
 
