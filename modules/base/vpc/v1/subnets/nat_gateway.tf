@@ -10,7 +10,7 @@ resource "aws_eip" "nat" {
 
   vpc = true
 
-  tags = var.nat_label.tags
+  tags = module.nat_label.tags
 
   lifecycle {
     create_before_destroy = true
@@ -29,9 +29,9 @@ resource "aws_nat_gateway" "public" {
     var.single_nat_gateway ? 0 : count.index,
   )
 
-  tags = merge(var.nat_label.tags,
+  tags = merge(module.nat_label.tags,
     {
-      "Name" = var.single_nat_gateway ? var.nat_label.id : format("%s-%s", var.nat_label.id, element(var.azs, count.index))
+      "Name" = var.single_nat_gateway ? module.nat_label.id : format("%s-%s", module.nat_label.id, element(var.azs, count.index))
     }
   )
   lifecycle {

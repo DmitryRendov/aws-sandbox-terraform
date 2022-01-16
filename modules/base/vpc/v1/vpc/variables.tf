@@ -35,7 +35,5 @@ variable "create_igw" {
 }
 
 variable "label" {
-  description = "(Optional) Label passed to the module."
-  type        = any
-  default     = {}
+  description = "(Required) Single `label` resource for setting context and tagging resources. Typically something like `module.label`."
 }

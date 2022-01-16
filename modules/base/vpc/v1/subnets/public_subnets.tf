@@ -7,16 +7,16 @@ resource "aws_subnet" "public" {
   availability_zone_id    = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
   map_public_ip_on_launch = var.map_public_ip_on_launch
 
-  tags = var.public_label.tags
+  tags = module.public_label.tags
 }
 
 resource "aws_route_table" "public" {
   count  = length(var.vpc_default_route_table_id) > 0 ? 0 : 1
   vpc_id = data.aws_vpc.default.id
 
-  tags = merge(var.public_label.tags,
+  tags = merge(module.public_label.tags,
     {
-      "Name" = format("%s-%s", var.public_label.id, element(var.azs, count.index))
+      "Name" = format("%s-%s", module.public_label.id, element(var.azs, count.index))
     }
   )
 }

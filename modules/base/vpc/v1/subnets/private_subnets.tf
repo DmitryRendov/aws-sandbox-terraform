@@ -6,9 +6,9 @@ resource "aws_subnet" "private" {
   availability_zone    = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) > 0 ? element(var.azs, count.index) : null
   availability_zone_id = length(regexall("^[a-z]{2}-", element(var.azs, count.index))) == 0 ? element(var.azs, count.index) : null
 
-  tags = merge(var.private_label.tags,
+  tags = merge(module.private_label.tags,
     {
-      "Name" = format("%s-%s", var.private_label.id, element(var.azs, count.index))
+      "Name" = format("%s-%s", module.private_label.id, element(var.azs, count.index))
     }
   )
 }
@@ -18,7 +18,7 @@ resource "aws_route_table" "private" {
 
   vpc_id = data.aws_vpc.default.id
 
-  tags = var.private_label.tags
+  tags = module.private_label.tags
 }
 
 resource "aws_route_table_association" "private" {
