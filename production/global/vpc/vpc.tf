@@ -1,7 +1,7 @@
 module "vpc" {
   source = "../../../modules/base/vpc/v1/vpc"
   cidr   = "10.100.0.0/16"
-  label  = module.vpc_label
+  label  = module.label
 }
 
 module "subnets" {
@@ -16,7 +16,5 @@ module "subnets" {
   single_nat_gateway = true
 
 
-  nat_label     = module.nat_label
-  private_label = module.private_label
-  public_label  = module.public_label
+  label     = module.label
 }
