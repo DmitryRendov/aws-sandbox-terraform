@@ -1,14 +1,10 @@
-provider "aws" {
-  region = var.region
-}
-
 resource "aws_security_group" "this" {
   name                   = var.name
   description            = var.description
   vpc_id                 = var.vpc_id
   revoke_rules_on_delete = var.revoke_rules_on_delete
 
-  
+
   dynamic "ingress" {
     for_each = var.ingress_rules
 
@@ -33,5 +29,5 @@ resource "aws_security_group" "this" {
     }
   }
 
-  tags = var.label
+  tags = var.label.tags
 }
