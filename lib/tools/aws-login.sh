@@ -7,13 +7,17 @@
 ## Requires: AWS CLI tools, jq, a bastion account user, and a 'sts' section in your ~/.aws/credentials file
 ##
 
-if [[ $# != 2 ]]; then
-    echo "usage: $0 <login|logout> <profile_name>"
+if [[ $# < 1 ]]; then
+    echo "usage: $0 <login|logout> <profile_name>(optional)"
     exit 1
 fi
 
-profile="$2"
-section="$profile"-sts
+profile=${2:-bastion}
+if [[ $profile == "bastion" ]]; then
+  section="sts"
+else
+  section="${2}-sts"
+fi
 
 command="$1"
 case $command in
