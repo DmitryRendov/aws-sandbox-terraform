@@ -29,5 +29,12 @@ data "aws_iam_policy_document" "security_settings" {
     ]
     resources = ["*"]
     effect    = "Deny"
+    condition {
+      test     = "StringNotLike"
+      variable = "aws:PrincipalARN"
+      values = [
+        "arn:aws:iam::*:role/super-user"
+      ]
+    }
   }
 }
