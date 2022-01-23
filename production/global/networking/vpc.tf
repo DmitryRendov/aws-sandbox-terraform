@@ -15,6 +15,5 @@ module "subnets" {
   enable_nat_gateway = true
   single_nat_gateway = true
 
-
-  label     = module.label
+  label = module.label
 }
