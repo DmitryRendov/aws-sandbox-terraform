@@ -21,20 +21,4 @@ data "aws_iam_policy_document" "security_settings" {
       values   = ["false"]
     }
   }
-
-  statement {
-    sid = "PreventModifyingS3PublicAccessBlock"
-    actions = [
-      "s3:PutBucketPublicAccessBlock"
-    ]
-    resources = ["*"]
-    effect    = "Deny"
-    condition {
-      test     = "StringNotLike"
-      variable = "aws:PrincipalARN"
-      values = [
-        "arn:aws:iam::*:role/super-user"
-      ]
-    }
-  }
 }
