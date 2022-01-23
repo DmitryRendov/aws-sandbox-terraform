@@ -14,6 +14,6 @@ locals {
   api_logs_retention_in_days = 30
   api_xray_tracing_enabled   = "false"
 
-  # Hostname for serverless web-site (серверлесс.девопс.бел)
-  hostname = "xn--b1afba3a1acdha.${data.terraform_remote_state.route53.outputs.zone_name}"
+  # Hostname for serverless web-site (cloudology.com)
+  hostname = data.terraform_remote_state.route53.outputs.zone_name
 }
