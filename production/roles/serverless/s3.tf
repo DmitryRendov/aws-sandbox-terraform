@@ -31,14 +31,11 @@ module "website" {
 
   s3_lifecycle_rules = [
     {
-      id         = "ExpireOldVersions"
-      transition = []
-      tags       = {}
-      enabled    = true
-      expiration = [{
-        days                         = 1
-        expired_object_delete_marker = true
-      }]
+      id                            = "ExpireOldVersions"
+      transition                    = []
+      tags                          = {}
+      enabled                       = true
+      expiration                    = []
       prefix                        = ""
       noncurrent_version_transition = []
       noncurrent_version_expiration = [{
