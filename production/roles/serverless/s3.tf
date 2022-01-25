@@ -16,8 +16,7 @@ module "website" {
   source = "../../../modules/base/s3-website/v1"
   label  = module.website_label
 
-  # AWS isn't supporting IDN domains
-  #hostname           = local.hostname
+  hostname         = local.hostname
   parent_zone_id   = data.terraform_remote_state.route53.outputs.zone_id
   parent_zone_name = data.terraform_remote_state.route53.outputs.zone_name
 
@@ -32,14 +31,11 @@ module "website" {
 
   s3_lifecycle_rules = [
     {
-      id         = "ExpireOldVersions"
-      transition = []
-      tags       = {}
-      enabled    = true
-      expiration = [{
-        days                         = 1
-        expired_object_delete_marker = true
-      }]
+      id                            = "ExpireOldVersions"
+      transition                    = []
+      tags                          = {}
+      enabled                       = true
+      expiration                    = []
       prefix                        = ""
       noncurrent_version_transition = []
       noncurrent_version_expiration = [{
