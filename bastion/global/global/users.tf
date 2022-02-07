@@ -45,7 +45,7 @@ module "ilya_melnik" {
   name   = "ilya_melnik"
 
   audit_policy_arns      = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
-  bastion_policy_arns    = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+  bastion_policy_arns    = ["arn:aws:iam::aws:policy/PowerUserAccess"]
   production_policy_arns = ["arn:aws:iam::aws:policy/PowerUserAccess"]
 
   providers = {
