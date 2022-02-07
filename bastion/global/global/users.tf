@@ -81,3 +81,17 @@ module "valerii_baev" {
     aws.production = aws.production
   }
 }
+
+module "pavel_barysiuk" {
+  source = "../../../modules/user-roles/v1"
+  name   = "pavel_barysiuk"
+
+  audit_policy_arns      = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+  bastion_policy_arns    = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+  production_policy_arns = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+
+  providers = {
+    aws.audit      = aws.audit
+    aws.production = aws.production
+  }
+}
