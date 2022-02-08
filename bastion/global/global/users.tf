@@ -17,8 +17,8 @@ module "aliaksei_kliashchonak" {
   name   = "aliaksei_kliashchonak"
 
   audit_policy_arns      = ["arn:aws:iam::aws:policy/PowerUserAccess"]
-  bastion_policy_arns    = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
-  production_policy_arns = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+  bastion_policy_arns    = local.ops_policies["ops_bastion_policy_arns"]
+  production_policy_arns = ["arn:aws:iam::aws:policy/PowerUserAccess"]
 
   providers = {
     aws.audit      = aws.audit
@@ -44,8 +44,8 @@ module "ilya_melnik" {
   source = "../../../modules/user-roles/v1"
   name   = "ilya_melnik"
 
-  audit_policy_arns      = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
-  bastion_policy_arns    = ["arn:aws:iam::aws:policy/PowerUserAccess"]
+  audit_policy_arns      = ["arn:aws:iam::aws:policy/PowerUserAccess"]
+  bastion_policy_arns    = local.ops_policies["ops_bastion_policy_arns"]
   production_policy_arns = ["arn:aws:iam::aws:policy/PowerUserAccess"]
 
   providers = {
@@ -60,7 +60,7 @@ module "arseni_dudko" {
 
   audit_policy_arns      = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
   bastion_policy_arns    = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
-  production_policy_arns = local.developer_policies["developer_prod_policy_arns"]
+  production_policy_arns = local.developer_policies["developer_production_policy_arns"]
 
   providers = {
     aws.audit      = aws.audit

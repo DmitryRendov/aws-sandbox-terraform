@@ -260,3 +260,28 @@ resource "aws_iam_policy" "developer_permissions" {
   name     = module.developer_label.id
   policy   = data.aws_iam_policy_document.developer_permissions.json
 }
+
+data "aws_iam_policy_document" "ops_role_iam" {
+  statement {
+    sid = "AllowOpsTerraformStates"
+    actions = [
+      "s3:DeleteObject",
+      "s3:Get*",
+      "s3:List*",
+      "s3:PutObject",
+      "s3:AbortMultipartUpload",
+    ]
+
+    resources = [
+      "arn:aws:s3:::mob-terraform-state/",
+      "arn:aws:s3:::mob-terraform-state/*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "ops_bastion_role_iam" {
+  name        = "bastion-role-ops-extras"
+  description = "Extra permissions for the ops role in the bastion account"
+  policy      = data.aws_iam_policy_document.ops_role_iam.json
+  tags        = merge(module.label.tags, { Name = "${module.label.id} - Terraform State bucket access" })
+}
