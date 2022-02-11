@@ -1,10 +1,10 @@
 module "atlantis-lb" {
   source = "../../../modules/base/ec2-alb/v1"
 
-  subnet_ids = ["subnet-0a928d26804414903", "subnet-04bd0a8b3d23efaa0"] #data.terraform_remote_state.networking.public_subnet_ids
+  subnet_ids = data.terraform_remote_state.networking.outputs.public_subnet_ids
   #  security_group_ids = 
   name   = "atlantis-alb"
-  vpc_id = "vpc-05839da360c2ed2a9" #data.terraform_remote_state.networking.vpc_id
+  vpc_id = data.terraform_remote_state.networking.outputs.vpc_id
 
   #  target_groups = [
   #    {
