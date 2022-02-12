@@ -11,6 +11,7 @@ resource "aws_iam_group_membership" "ops" {
   users = [
     module.dmitry_rendov.name,
     module.aliaksei_kliashchonak.name,
+    module.pavel_barysiuk.name,
   ]
 
   group = aws_iam_group.ops.name
