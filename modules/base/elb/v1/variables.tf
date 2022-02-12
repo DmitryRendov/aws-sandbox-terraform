@@ -16,6 +16,11 @@ variable "internal" {
   default     = false
 }
 
+variable "load_balancer_type" {
+  description = "The type of load balancer to create."
+  type        = string
+  default     = "application"
+}
 variable "ip_address_type" {
   description = "(Optional) The type of IP addresses used by the subnets for your load balancer. The possible values are ipv4 and dualstack."
   type        = string
