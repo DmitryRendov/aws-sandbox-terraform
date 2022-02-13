@@ -1,43 +1,33 @@
-data "aws_ssm_parameter" "read" {
-  count = length(local.parameter_read)
-  name  = element(local.parameter_read, count.index)
+module "label" {
+  source              = "../../../base/label/v1"
+  context             = var.label.context
+  attributes          = [var.secret_name]
+  delimiter           = "/"
+  regex_replace_chars = "/[^-_a-zA-Z0-9/]/"
 }
 
-resource "aws_ssm_parameter" "default" {
-  for_each = local.parameter_write
-
-  name            = each.key
-  description     = each.value.description
-  type            = each.value.type
-  tier            = each.value.tier
-  key_id          = each.value.type == "SecureString" ? var.kms_arn : ""
-  value           = each.value.type == "SecureString" ? "not_secret" : each.value.value
-  overwrite       = each.value.overwrite
-  allowed_pattern = each.value.allowed_pattern
-  data_type       = each.value.data_type
-
-  tags = var.label.tags
-}
-
-resource "aws_ssm_parameter" "ignore_value_changes" {
-  for_each = local.parameter_write_ignore_values
-
-  name            = each.key
-  description     = each.value.description
-  type            = each.value.type
-  tier            = each.value.tier
-  key_id          = each.value.type == "SecureString" ? var.kms_arn : ""
-  value           = each.value.type == "SecureString" ? "not_secret" : each.value.value
-  overwrite       = each.value.overwrite
-  allowed_pattern = each.value.allowed_pattern
-  data_type       = each.value.data_type
-
-  tags = var.label.tags
+resource "aws_ssm_parameter" "default_secure_string" {
+  count       = local.is_secret_string ? 1 : 0
+  name        = "/${module.label.id}"
+  description = var.description
+  type        = var.type
+  value       = "not_secret"
+  overwrite   = true
+  tier        = var.tier
+  tags        = local.tags
 
   lifecycle {
-    ignore_changes = [
-      value,
-      tier
-    ]
+    ignore_changes = [value, tier]
   }
+}
+
+resource "aws_ssm_parameter" "default_string" {
+  count       = local.is_string ? 1 : 0
+  name        = "/${module.label.id}"
+  description = var.description
+  type        = var.type
+  value       = var.value
+  overwrite   = true
+  tier        = var.tier
+  tags        = local.tags
 }

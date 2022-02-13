@@ -1,43 +1,31 @@
-variable "parameter_read" {
-  type        = list(string)
-  description = "List of parameters to read from SSM. These must already exist otherwise an error is returned. Can be used with `parameter_write` as long as the parameters are different."
-  default     = []
+
+variable "description" {
+  description = "What is this secret used for."
 }
 
-variable "parameter_write" {
-  type        = list(map(string))
-  description = "List of maps with the parameter values to write to SSM Parameter Store"
-  default     = []
+variable "secret_name" {
+  description = "Secret name will be /role_name/environment/secret_name"
 }
 
-variable "kms_arn" {
-  type        = string
-  default     = "aws/ssm"
-  description = "The ARN of a KMS key used to encrypt and decrypt SecretString values. Default: aws/ssm"
+variable "username" {
+  description = "User who has access to secret"
+  default     = "NONE"
 }
 
-variable "parameter_write_defaults" {
-  type        = map(any)
-  description = "Parameter write default settings"
-  default = {
-    description     = null
-    type            = "SecureString"
-    value           = "not_secret"
-    tier            = "Standard"
-    overwrite       = "false"
-    allowed_pattern = null
-    data_type       = "text"
-  }
+variable "value" {
+  description = "Value of the parameter, not used for secure strings"
+  default     = ""
 }
 
-variable "ignore_value_changes" {
-  type        = bool
-  description = "Whether to ignore future external changes in paramater values"
-  default     = false
+variable "type" {
+  description = "Either SecureString or String"
+}
+
+variable "tier" {
+  description = "Either Standard or Advanced. Advanced is needed for secrets greater than 4k"
+  default     = "Standard"
 }
 
 variable "label" {
-  description = "Label passed to the module."
-  type        = any
-  default     = {}
+  description = "Single `label` resource for setting context and tagging resources. Typically this will be something like `module.label`."
 }
