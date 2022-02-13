@@ -12,3 +12,8 @@ output "zone_name" {
   description = "Name of the Route53 zone"
   value       = join("", values(module.hosted_zones.route53_zone_name))
 }
+
+output "certificate_arn" {
+  description = "Certificate arn"
+  value       = module.acm_request_certificate.arn
+}
