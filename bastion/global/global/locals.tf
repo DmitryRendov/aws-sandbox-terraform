@@ -22,4 +22,11 @@ locals {
       aws_iam_policy.ops_bastion_role_iam.arn,
     ]
   }
+
+  github_ci_policies = {
+    github_ci_policy_arns = [
+      "arn:aws:iam::aws:policy/ReadOnlyAccess",
+      aws_iam_policy.github_ci_role_iam.arn,
+    ]
+  }
 }

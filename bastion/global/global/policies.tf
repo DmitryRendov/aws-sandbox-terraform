@@ -285,3 +285,49 @@ resource "aws_iam_policy" "ops_bastion_role_iam" {
   policy      = data.aws_iam_policy_document.ops_role_iam.json
   tags        = merge(module.label.tags, { Name = "${module.label.id} - Terraform State bucket access" })
 }
+
+
+data "aws_iam_policy_document" "github_ci_role_iam" {
+  statement {
+    sid    = "AllowGitHubActionsLambda"
+    effect = "Allow"
+
+    actions = [
+      "lambda:CreateFunction",
+      "lambda:DeleteFunction",
+      "lambda:Get*",
+      "lambda:InvokeFunction",
+      "lambda:List*",
+      "lambda:Publish*",
+      "lambda:UpdateAlias",
+      "lambda:UpdateFunctionCode",
+    ]
+
+    resources = [
+      "arn:aws:lambda:*:*:function:aws-sandbox-serverless*",
+    ]
+  }
+
+  statement {
+    sid    = "AllowGitHubActionsS3"
+    effect = "Allow"
+
+    actions = [
+      "s3:DeleteObject*",
+      "s3:GetObject*",
+      "s3:List*",
+      "s3:PutObject*",
+    ]
+
+    resources = [
+      "arn:aws:s3:::cloudology.by",
+      "arn:aws:s3:::sb-production-serverless*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "github_ci_permissions" {
+  name        = "github-ci-role"
+  description = "GitHub CI role permissions"
+  policy      = data.aws_iam_policy_document.github_ci_role_iam.json
+}

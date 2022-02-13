@@ -95,3 +95,17 @@ module "pavel_barysiuk" {
     aws.production = aws.production
   }
 }
+
+module "github_ci" {
+  source = "../../../modules/user-roles/v1"
+  name   = "github_ci"
+
+  audit_policy_arns      = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+  bastion_policy_arns    = ["arn:aws:iam::aws:policy/ReadOnlyAccess"]
+  production_policy_arns = local.github_ci_policies["github_ci_policy_arns"]
+
+  providers = {
+    aws.audit      = aws.audit
+    aws.production = aws.production
+  }
+}
