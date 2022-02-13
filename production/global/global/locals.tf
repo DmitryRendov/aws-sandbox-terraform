@@ -2,6 +2,8 @@ locals {
   role_name = "global"
   team      = "ops"
 
+  machine_user_name = "machine_user"
+
   aws_log_delivery_service_enabled    = false
   aws_elb_logging_enabled             = false
   aws_cloudwatch_logs_service_enabled = true
