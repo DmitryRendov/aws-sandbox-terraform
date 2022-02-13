@@ -6,7 +6,7 @@ This module is used to creates ALB resources on AWS
 ## Example Usage
 ```hcl
 module "example-alb" {
-  source = "../../../modules/base/elb/v1"
+  source = "../../../modules/base/alb/v1"
 
   subnet_ids         = ["subnet-12345678", "subnet-87654321"]
   security_group_ids = ["sg-12345678"]
