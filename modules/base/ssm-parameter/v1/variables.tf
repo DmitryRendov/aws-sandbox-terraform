@@ -12,8 +12,8 @@ variable "parameter_write" {
 
 variable "kms_arn" {
   type        = string
-  default     = ""
-  description = "The ARN of a KMS key used to encrypt and decrypt SecretString values"
+  default     = "aws/ssm"
+  description = "The ARN of a KMS key used to encrypt and decrypt SecretString values. Default: aws/ssm"
 }
 
 variable "parameter_write_defaults" {
@@ -22,6 +22,7 @@ variable "parameter_write_defaults" {
   default = {
     description     = null
     type            = "SecureString"
+    value           = "not_secret"
     tier            = "Standard"
     overwrite       = "false"
     allowed_pattern = null

@@ -2,17 +2,34 @@
 ## Purpose
 This module is used for providing read and write access to the AWS SSM Parameter Store.
 
+Note: We don't keep any secrets in Terraform, just provision placeholder in SSM. You need to pre-populate it on your own via AWS cli or API.
 
 ## Example Usage
-> This example creates a new String parameter called /prod/app/database/master_password with the value of password1.
+> This example creates a new String parameter called /prod/app/database/master_username with the value of `toor`.
 ```hcl
 module "store_write" {
-  source          = "../../../modules/base/ssm-parameter-store/v1"
+  source          = "../../../modules/base/ssm-parameter/v1"
+  parameter_write = [
+    {
+      name        = "/prod/app/database/master_username"
+      value       = "toor"
+      type        = "String"
+      overwrite   = "true"
+      description = "Production database master username"
+    }
+  ]
+
+  label = module.label
+}
+```
+> This example creates a new Secret String parameter called /prod/app/database/master_password with the undefined value (`not_secret`).
+```hcl
+module "store_secret_write" {
+  source          = "../../../modules/base/ssm-parameter/v1"
   parameter_write = [
     {
       name        = "/prod/app/database/master_password"
-      value       = "password1"
-      type        = "String"
+      type        = "SecureString"
       overwrite   = "true"
       description = "Production database master password"
     }
@@ -21,11 +38,12 @@ module "store_write" {
   label = module.label
 }
 ```
+
 > This example reads a value from the parameter store with the name /prod/app/database/master_password
 ```hcl
 module "store_read" {
-  source          = "../../../modules/base/ssm-parameter-store/v1"
-  parameter_read  = ["/prod/app/database/master_password"]
+  source          = "../../../modules/base/ssm-parameter/v1"
+  parameter_read  = ["/prod/app/database/master_username"]
 
   label = module.label
 }
