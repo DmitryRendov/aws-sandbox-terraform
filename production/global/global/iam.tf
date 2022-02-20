@@ -116,17 +116,69 @@ data "aws_iam_policy_document" "terraform_state_access" {
   }
 
   statement {
+    sid    = "AllowGitHubActionsLambda"
     effect = "Allow"
 
     actions = [
-      "s3:Put*",
+      "lambda:CreateFunction",
+      "lambda:DeleteFunction",
+      "lambda:Get*",
+      "lambda:InvokeFunction",
+      "lambda:List*",
+      "lambda:Publish*",
+      "lambda:UpdateAlias",
+      "lambda:UpdateFunctionCode",
+    ]
+
+    resources = [
+      "arn:aws:lambda:*:*:function:aws-sandbox-serverless*",
+    ]
+  }
+
+  statement {
+    sid    = "AllowGitHubActionsS3"
+    effect = "Allow"
+
+    actions = [
+      "s3:DeleteObject*",
+      "s3:GetObject*",
+      "s3:List*",
+      "s3:PutObject*",
     ]
 
     resources = [
       "arn:aws:s3:::${var.terraform_remote_state_bucket}/github",
       "arn:aws:s3:::${var.terraform_remote_state_bucket}/github/*",
+      "arn:aws:s3:::${var.terraform_remote_state_serverless_bucket}*",
+      "arn:aws:s3:::${var.terraform_remote_state_serverless_bucket}*/*",
+      "arn:aws:s3:::cloudology.by",
     ]
   }
+
+  statement {
+    sid    = "AllowGitHubActionsECR"
+    effect = "Allow"
+
+    actions = [
+      "ecr:CompleteLayerUpload",
+      "ecr:BatchGet*",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:Describe*",
+      "ecr:Get*",
+      "ecr:InitiateLayerUpload",
+      "ecr:List*",
+      "ecr:PutImage",
+      "ecr:TagResource",
+      "ecr:UntagResource",
+      "ecr:UploadLayerPart",
+    ]
+
+    /* TODO: update ARN for existing ECR */
+    /* resource = [ */
+    /*     "arn:${Partition}:ecr:${Region}:${Account}:repository/${RepositoryName}" */
+    /* ] */
+  }
+
 }
 
 resource "aws_iam_role_policy" "terraform_github_state_editor" {

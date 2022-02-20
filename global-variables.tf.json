@@ -134,6 +134,10 @@
     "terraform_remote_state_region": {
       "default": "us-east-1",
       "description": "Terraform remote s3 storage region"
+    },
+    "terraform_remote_state_serverless_bucket": {
+      "default": "sb-production-serverless",
+      "description": "Terraform remote serverless s3 bucket for production"
     }
   }
 }

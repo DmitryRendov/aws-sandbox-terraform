@@ -223,8 +223,8 @@ data "aws_iam_policy_document" "developer_permissions" {
     ]
 
     resources = [
-      "arn:aws:s3:::sb-production-serverless*",
-      "arn:aws:s3:::sb-production-serverless*/*",
+      "arn:aws:s3:::${var.terraform_remote_state_serverless_bucket}*",
+      "arn:aws:s3:::${var.terraform_remote_state_serverless_bucket}*/*",
     ]
   }
 
@@ -273,8 +273,8 @@ data "aws_iam_policy_document" "ops_role_iam" {
     ]
 
     resources = [
-      "arn:aws:s3:::mob-terraform-state/",
-      "arn:aws:s3:::mob-terraform-state/*",
+      "arn:aws:s3:::${var.terraform_remote_state_bucket}",
+      "arn:aws:s3:::${var.terraform_remote_state_bucket}/*",
     ]
   }
 }
