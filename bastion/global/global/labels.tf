@@ -12,3 +12,9 @@ module "developer_label" {
   name        = "developer"
   attributes  = ["policy"]
 }
+
+module "backups_label" {
+  source     = "../../../modules/base/label/v1"
+  context    = module.label.context
+  attributes = ["backups"]
+}
