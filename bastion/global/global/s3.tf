@@ -49,11 +49,11 @@ data "aws_iam_policy_document" "private_backups_policy" {
     }
 
     condition {
-      test     = "ForAllValues:StringNotLike"
-      variable = "aws:aws:PrincipalArn"
+      test     = "StringNotLike"
+      variable = "aws:PrincipalArn"
       values = [
         "arn:aws:iam::${var.aws_account_id}:user/${module.dmitry_rendov.name}",
-        var.aws_account_id,
+        "arn:aws:iam::${var.aws_account_id}:role/super-user",
       ]
     }
 
