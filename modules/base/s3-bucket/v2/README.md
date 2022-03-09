@@ -116,6 +116,9 @@ module "s3_bucket" {
 
 ## History:
 
+### v2:
+- Support One Zone IA mode as S3 life-cycle
+
 ### v1:
 - Support pre-defined IAM roles and Buckets for replication configuration
 - Update replication rules to support propagating object deletions. This is enabled by default.
