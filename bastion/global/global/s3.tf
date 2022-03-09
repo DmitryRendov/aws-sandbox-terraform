@@ -1,11 +1,12 @@
 # S3 bucket for Private Backups
 module "backup" {
-  source      = "../../../modules/base/s3-bucket/v1"
+  source      = "../../../modules/base/s3-bucket/v2"
   label       = module.label
   bucket_name = "mob-private-backups"
 
-  versioning_enabled = false
-  backups_enabled    = false
+  versioning_enabled            = false
+  backups_enabled               = false
+  transition_to_onezone_ia_days = "30"
 
   providers = {
     aws.src = aws
@@ -25,35 +26,9 @@ data "aws_iam_policy_document" "private_backups_policy" {
     principals {
       type = "AWS"
       identifiers = [
-        "arn:aws:iam::${var.aws_account_id}:user/${module.dmitry_rendov.name}",
-        "arn:aws:iam::${var.aws_account_id}:role/${module.dmitry_rendov.name}",
-      ]
-    }
-
-    resources = [
-      module.backup.arn,
-      "${module.backup.arn}/*",
-    ]
-  }
-
-  statement {
-    effect = "Deny"
-
-    actions = [
-      "s3:*",
-    ]
-
-    principals {
-      type        = "AWS"
-      identifiers = ["*"]
-    }
-
-    condition {
-      test     = "StringNotLike"
-      variable = "aws:PrincipalArn"
-      values = [
-        "arn:aws:iam::${var.aws_account_id}:user/${module.dmitry_rendov.name}",
+        "arn:aws:iam::${var.aws_account_id}:root",
         "arn:aws:iam::${var.aws_account_id}:role/super-user",
+        "arn:aws:iam::${var.aws_account_id}:user/${module.dmitry_rendov.name}",
       ]
     }
 
@@ -62,7 +37,6 @@ data "aws_iam_policy_document" "private_backups_policy" {
       "${module.backup.arn}/*",
     ]
   }
-
 }
 
 resource "aws_s3_bucket_policy" "restrict_only_owner" {
