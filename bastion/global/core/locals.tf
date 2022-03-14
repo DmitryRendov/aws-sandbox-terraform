@@ -12,7 +12,7 @@ locals {
     {
       name    = "bastion"
       account = var.aws_account_map["bastion"]
-      limit   = 5
+      limit   = 10.0
     },
     {
       name    = "production"
