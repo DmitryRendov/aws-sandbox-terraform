@@ -285,3 +285,22 @@ resource "aws_iam_policy" "ops_bastion_role_iam" {
   policy      = data.aws_iam_policy_document.ops_role_iam.json
   tags        = merge(module.label.tags, { Name = "${module.label.id} - Terraform State bucket access" })
 }
+
+data "aws_iam_policy_document" "deactivated_permissions" {
+  statement {
+    effect = "Deny"
+
+    actions = [
+      "*",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+}
+
+resource "aws_iam_policy" "deactivated_user" {
+  name   = module.deactivated_label.id
+  policy = data.aws_iam_policy_document.deactivated_permissions.json
+}

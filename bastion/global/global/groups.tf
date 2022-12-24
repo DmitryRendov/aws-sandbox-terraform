@@ -11,7 +11,6 @@ resource "aws_iam_group_membership" "ops" {
   users = [
     module.dmitry_rendov.name,
     module.aliaksei_kliashchonak.name,
-    module.pavel_barysiuk.name,
   ]
 
   group = aws_iam_group.ops.name
@@ -33,10 +32,7 @@ resource "aws_iam_group_membership" "developers" {
   name = "developers-group-membership"
 
   users = [
-    module.mikhail_parkun.name,
-    module.ilya_melnik.name,
     module.arseni_dudko.name,
-    module.valerii_baev.name,
   ]
 
   group = aws_iam_group.developers.name
