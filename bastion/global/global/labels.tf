@@ -18,3 +18,9 @@ module "backups_label" {
   context    = module.label.context
   attributes = ["backups"]
 }
+
+module "deactivated_label" {
+  source     = "../../../modules/base/label/v1"
+  context    = module.label.context
+  attributes = ["deactivated"]
+}
