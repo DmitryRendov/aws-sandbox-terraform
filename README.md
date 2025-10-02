@@ -1,9 +1,76 @@
 # Terraform #
 
-## Setup
+## Pre-requisites
+
+1. Install dependencies (e.g. Ubintu 22)
+```bash
+sudo apt-get update && sudo apt-get -y upgrade
+sudo apt-get install -y git make jq tar unzip wget python3 python3-pip
+```
+
+2. Make sure that you're using Python3.9+
+```
+python3 --version
+```
+
+3. Install Go by following the official guide https://golang.org/doc/install
+
+a. Download the Go
+
+```wget https://go.dev/dl/go1.25.1.linux-amd64.tar.gz```
+
+b. Unpack the package
+
+```sudo rm -rf ~/go && tar -C ~/ -xzf go1.25.1.linux-amd64.tar.gz```
+
+c. Update env variables
+
+```
+mkdir ~/.go
+echo 'export GOPATH="$HOME/.go"' >> ~/.bashrc
+echo 'export PATH="$PATH:$HOME/go/bin"' >> ~/.bashrc
+```
+
+d. Reload the config
+
+```source ~/.bashrc```
+
+e. Verify that you've installed Go right
+
+```go version```
+
+5. Install tfenv from the source
+
+```
+git clone https://github.com/tfutils/tfenv.git ~/.tfenv
+echo 'export PATH="$HOME/.tfenv/bin:$PATH"' >> ~/.bashrc
+```
+
+Reload the config
+
+```bash
+source ~/.bashrc
+```
+
+
+## Setup Terraform and dependencies
+
 ```bash
 make setup
 ```
+
+### What does `make setup` do?
+
+The `setup` target in the Makefile installs and configures several development dependencies:
+
+- **pre-commit**: Installs the `pre-commit` Python package globally (if not already installed) and runs `pre-commit install` to set up Git hooks for automated code checks.
+- **terraform-config-inspect**: Installs the latest version of HashiCorp's `terraform-config-inspect` tool using Go. This tool is used to inspect Terraform modules and configurations programmatically.
+- **terraform-docs**: Installs version 0.15.0 of `terraform-docs` using Go, which generates documentation from Terraform modules.
+- **Python requirements**: Installs all Python packages listed in `lib/requirements.txt` using pip3.
+
+If any required tool is missing, the setup will attempt to install it or prompt you with instructions.
+
+**Note:** Ensure your Go environment (`GOPATH` and `PATH`) is correctly set up so that installed Go binaries are available in your shell.
 
 ## Running
 
@@ -35,15 +102,6 @@ Configuration for each respective account, there is only one account per directo
 
 ### <account>/global
 Configuration for resources which are global in AWS, shared across multiple roles and required for each new account.
-
-Examples:
-
-* Global IAM role
-* ACM Certificates
-* Cloudtrail and AWS Config Setup
-
-### <account>/roles
-A role is a distinct functionality which requires typically requires it's own separate IAM role.
 
 Examples:
 * aws-config
