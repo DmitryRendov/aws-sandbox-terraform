@@ -102,12 +102,12 @@ output = json
 cli_timestamp_format = iso8601
 
 [profile bastion]
-mfa_serial = arn:aws:iam::500976330694:mfa/<your MFA device Identifier>
+mfa_serial = arn:aws:iam::501055688096:mfa/<your MFA device Identifier>
 
 [profile sts]
 terraform_sts_expiration = 1654554457
 ```
-where **500976330694** is your bastion account ID and do not forget to configure your MFA Virtual device.
+where **501055688096** is your Bastion account ID, and do not forget to configure your MFA Virtual device.
 
 
 ## Running
@@ -174,11 +174,11 @@ Shared Makefiles, scripts, plugins, providers, configurations
 Modules are in `/modules`, roughly divided into two categories: `base` and `site`
 
 `base` modules are modules that are used by other modules, or modules that are copied from the Internet. These are modules that we could conceivably release as open source.
-`site` modules are modules that have AWS Sandbox specific configuration, and are unlikely to be ever released to the public. They very likely are a composition of other modules.
+`site` modules are modules that have AWS Sandbox-specific configuration, and are unlikely to ever be released to the public. They very likely are a composition of other modules.
 
 ### Module versioniong ###
 
-Each module has one or more versions. When creating a new version, simply copy the code to the next version directory, and make a PR with changes. It is best to make one commit to add the new version with no code changes, and subsequent commits to make changes, so it is easier for code reviewers to see just the differences in a module.
+Each module has one or more versions. When creating a new version, simply copy the code to the next version directory and make a PR with changes. It is best to make one commit to add the new version with no code changes, and subsequent commits to make changes, so it is easier for code reviewers to see just the differences in a module.
 
 Breaking changes that require a new version:
 
@@ -198,11 +198,11 @@ When asked to change your account password, please log out again after setting t
 You can switch between the AWS accounts using the roles automatically created for you in every account. The process to assume these new roles is the same as the process above, except the role name will now be standartized, such as firstName_lastName (i.e. dmitry_rendov). Here is an example URL to assume a role in the
 
 Production account:
-* https://signin.aws.amazon.com/switchrole?account=091599657285&roleName=dmitry_rendov&displayName=Prod
+* https://signin.aws.amazon.com/switchrole?account=562495469185&roleName=dmitry_rendov&displayName=Prod
 
 To use these new roles in the CLI run the following commands, but replace the account id and name with the correct values:
 ```
-aws --profile prod-dmitry_rendov configure set role_arn arn:aws:iam::091599657285:role/dmitry_rendov
+aws --profile prod-dmitry_rendov configure set role_arn arn:aws:iam::562495469185:role/dmitry_rendov
 aws --profile prod-dmitry_rendov configure set region us-east-1
 aws --profile prod-dmitry_rendov configure set source_profile sts
 ```
