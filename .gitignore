@@ -10,3 +10,4 @@ saved*plan
 **/terraform.tfstate.*.backup
 .idea
 *.iml
+.vscode
