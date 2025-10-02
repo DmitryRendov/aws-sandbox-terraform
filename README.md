@@ -133,13 +133,13 @@ make apply-prod
 ## Layout ##
 
 ### AWS Sandbox
-This is where the AWS Sandbox infrastructure live.
+This is where the AWS Sandbox infrastructure lives.
 
 ### audit|bastion|production ###
-Configuration for each respective account, there is only one account per directory
+For each respective account, there is only one account per directory
 
 ### <account>/global
-Configuration for resources which are global in AWS, shared across multiple roles and required for each new account.
+Configuration for resources that are global in AWS, shared across multiple roles, and required for each new account.
 
 Examples:
 * Global IAM role
@@ -147,7 +147,7 @@ Examples:
 * Cloudtrail and AWS Config Setup
 
 ### <account>/roles
-A role is a distinct functionality which requires typically requires it's own separate IAM role.
+A role is a distinct functionality which requires typically requires its own separate IAM role.
 
 Examples:
 * aws-config
@@ -188,28 +188,28 @@ Breaking changes that require a new version:
 Non-breaking changes that do not require a new version:
 
 * Adding outputs (usually)
-* Use your best judgement
+* Use your best judgment
 
 ## Using the AWS Console with multiple roles
 
 When asked to change your account password, please log out again after setting the password. Log in with a fresh session using the new password and current MFA token. This should ensure you have sufficient access to assume the correct roles as usual. The AWS console supports the ability to assume different roles directly within the console interface. Each day you want to work in the AWS console, you will log into the Bastion account with your chosen credentials when running the bootstrap script. After logging into the Bastion account and entering your MFA token, you will be taken to the console home page. From the home page, you now have permission to assume the different roles granted to you. [The document](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-console.html) shows you how to manually enter different roles to make them available in the console to switch to. For your convenience, we also link directly to the different available roles so you can add them to your browser easily. They are linked next to the role's name below and with the text 'Console Switch Role.'
 
 ### Switch accounts/roles
-You can switch between the AWS accounts using the roles, automatically created for you in every account. The process to assume these new roles is the same as the process above except the role name will now be standartized such as firstName_lastName (i.e. dmitry_rendov). Here is an example URL to assume a role in the
+You can switch between the AWS accounts using the roles automatically created for you in every account. The process to assume these new roles is the same as the process above, except the role name will now be standartized, such as firstName_lastName (i.e. dmitry_rendov). Here is an example URL to assume a role in the
 
 Production account:
 * https://signin.aws.amazon.com/switchrole?account=091599657285&roleName=dmitry_rendov&displayName=Prod
 
-To use these new roles in the CLI run the following commands but replace the account id and name with the correct values:
+To use these new roles in the CLI run the following commands, but replace the account id and name with the correct values:
 ```
 aws --profile prod-dmitry_rendov configure set role_arn arn:aws:iam::091599657285:role/dmitry_rendov
 aws --profile prod-dmitry_rendov configure set region us-east-1
 aws --profile prod-dmitry_rendov configure set source_profile sts
 ```
 
-Each user's permissions are defined in the terraform repo (either in bastion/global/global/users.tf).
+Each user's permissions are defined in the Terraform repo (either in bastion/global/global/users.tf).
 
-By default, a user has Administrator Access to the Dev account and Read Only Access to other accounts unless specified otherwise. Each user also can manage their password and MFA device in the Dev account.
+By default, a user has Administrator Access to the Dev account and Read Only Access to other accounts unless specified otherwise. Each user can also manage their password and MFA device in the Dev account.
 
 ### Switching roles in the AWS web console
 Click on your name in the top right of the AWS console, and choose Switch Role
@@ -218,12 +218,12 @@ Click on your name in the top right of the AWS console, and choose Switch Role
 
 
 On the next page, enter the appropriate account number, such as 091599657285 in the case of the Prod account.
-The role will be your firstNameLastName (i.e. dmitry_rendov). The alias is whatever helps you remember which environment you are entering. The list of prior roles in Role History is stored in a cookie, which periodically disappears. To avoid this frustration, see below for a helpful browser extension to greatly simplify role switching (and let you see more than 5 prior roles)
+The role will be your firstNameLastName (i.e., dmitry_rendov). The alias is whatever helps you remember which environment you are entering. The list of prior roles in Role History is stored in a cookie, which periodically disappears. To avoid this frustration, see below for a helpful browser extension to greatly simplify role switching (and let you see more than 5 prior roles)
 
 ### Logging in to AWS Web Console access
-The main entry point to AWS Console access is logging in via Bastion account https://500976330694.signin.aws.amazon.com/console. This is the bastion account that contains all your IAM user. After logging in you can assume roles, as described above, depending on what you need to do.
+The main entry point to AWS Console access is logging in via Bastion account https://501055688096.signin.aws.amazon.com/console. This is the bastion account that contains all your IAM user. After logging in, you can assume roles, as described above, depending on what you need to do.
 
-Since our policies require MFA periodically, you will need to (at least once per day), ensure you get a new STS token. Our helpful wrapper script will do this for you
+Since our policies require MFA periodically, you will need to ensure you get a new STS token. Our helpful wrapper script will do this for you
 ```aws-login.sh login```
 #You will be prompted to enter your MFA token
 Once you have gotten a new daily token, you will be able to use the CLI to do your job. The AWS CLI supports multiple ways of telling it what profile to use when executing commands.
