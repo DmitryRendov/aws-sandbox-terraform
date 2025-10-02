@@ -104,6 +104,14 @@ Configuration for each respective account, there is only one account per directo
 Configuration for resources which are global in AWS, shared across multiple roles and required for each new account.
 
 Examples:
+* Global IAM role
+* ACM Certificates
+* Cloudtrail and AWS Config Setup
+
+### <account>/roles
+A role is a distinct functionality which requires typically requires it's own separate IAM role.
+
+Examples:
 * aws-config
 * atlantis
 * ecs
