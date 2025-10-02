@@ -109,6 +109,7 @@ terraform_sts_expiration = 1654554457
 ```
 where **500976330694** is your bastion account ID and do not forget to configure your MFA Virtual device.
 
+
 ## Running
 
 We use `make` to wrap Terraform commands and include extra functionality.
