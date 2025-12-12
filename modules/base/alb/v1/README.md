@@ -1,82 +1,16 @@
 <!-- BEGIN_TF_DOCS -->
-## Purpose
-This module is used to creates ALB resources on AWS
-
-
-## Example Usage
-```hcl
-module "example-alb" {
-  source = "../../../modules/base/alb/v1"
-
-  subnet_ids         = ["subnet-12345678", "subnet-87654321"]
-  security_group_ids = ["sg-12345678"]
-  name               = "exaple-alb"
-  vpc_id             = "vpc-11111f11"
-
-  target_groups = [
-    {
-      name        = "example-app"
-      protocol    = "HTTP"
-      port        = 80
-      target_type = "instance"
-      targets     = [
-       {
-        target_id = "i-0123456789abcdefg"
-        port = 80
-       },
-       {
-        target_id = "i-a1b2c3d4e5f6g7h8i"
-        port = 8080
-       }
-      ]
-      health_check = {
-        interval            = 30
-        path                = "/heathz"
-        port                = "traffic-port"
-        healthy_threshold   = 3
-        unhealthy_threshold = 3
-        timeout             = 6
-        protocol            = "HTTP"
-        matcher             = "200-399"
-      }
-    }
-  ]
-
-  listeners = [
-    {
-      port        = 80
-      protocol    = "HTTP"
-      action_type = "redirect"
-      redirect = {
-        port        = "443"
-        protocol    = "HTTPS"
-        status_code = "HTTP_301"
-      }
-    },
-    {
-      port               = 443
-      protocol           = "HTTPS"
-      certificate_arn    = "arn:aws:iam::123456789012:server-certificate/test_cert-123456789012"
-      target_group_index = 0
-      action_type        = "forward"
-  ]
-
-  label = module.alb_label
-}
-```
-
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.1 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.40 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.13.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.40 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0.0 |
 
 ## Modules
 
@@ -107,6 +41,7 @@ No modules.
 | <a name="input_listener_rules"></a> [listener\_rules](#input\_listener\_rules) | (Optional) A list of maps describing the Listener Rules for this ALB.<br><br>    Required key/values: actions, conditions. | `any` | `[]` | no |
 | <a name="input_listener_ssl_policy_default"></a> [listener\_ssl\_policy\_default](#input\_listener\_ssl\_policy\_default) | The security policy if using HTTPS externally on the load balancer. [See](https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/elb-security-policy-table.html). | `string` | `"ELBSecurityPolicy-2016-08"` | no |
 | <a name="input_listeners"></a> [listeners](#input\_listeners) | (Optional) A list of maps describing the listeners or TCP ports for this ALB.<br><br>    Required key/values: port, protocol. | `any` | `[]` | no |
+| <a name="input_load_balancer_type"></a> [load\_balancer\_type](#input\_load\_balancer\_type) | The type of load balancer to create. | `string` | `"application"` | no |
 | <a name="input_name"></a> [name](#input\_name) | (Required) The resource name and Name tag of the load balancer. | `string` | `null` | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | (Required) The security groups to attach to the load balancer. e.g. ["sg-edcd9784","sg-edcd9785"] | `list(string)` | `[]` | no |
 | <a name="input_subnet_ids"></a> [subnet\_ids](#input\_subnet\_ids) | (Required) A list of subnets to associate with the load balancer. e.g. ['subnet-1a2b3c4d','subnet-1a2b3c4e','subnet-1a2b3c4f'] | `list(string)` | `null` | no |

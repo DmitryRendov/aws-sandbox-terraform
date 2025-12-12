@@ -12,7 +12,7 @@ This type of resources are supported:
 
 ## Terraform versions
 
-Terraform >= 0.13.7 is supported.
+Terraform >= 1.13.0 is supported.
 
 ## Usage
 

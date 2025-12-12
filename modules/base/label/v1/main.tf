@@ -126,26 +126,27 @@ locals {
 
   # Create a truncated ID if needed
   delimiter_length = length(local.delimiter)
+
   # Calculate length of normal part of ID, leaving room for delimiter and hash
-  id_truncated_length_limit = local.id_length_limit - (local.id_hash_length + local.delimiter_length)
-  # Truncate the ID and ensure a single (not double) trailing delimiter
-  id_truncated = local.id_truncated_length_limit <= 0 ? "" : "${trimsuffix(substr(local.id_brief, 0, local.id_truncated_length_limit), local.delimiter)}${local.delimiter}"
+  id_truncated_length_limit = local.id_length_limit - local.id_hash_length - local.delimiter_length # Truncate the ID and ensure a single (not double) trailing delimiter
+  id_truncated              = local.id_truncated_length_limit <= 0 ? "" : "${trimsuffix(substr(local.id_brief, 0, local.id_truncated_length_limit), local.delimiter)}${local.delimiter}"
+
   # Support usages that disallow numeric characters. Would prefer tr 0-9 q-z but Terraform does not support it.
   id_hash_plus = "${md5(local.id_full)}qrstuvwxyz"
   id_hash_case = lower(local.id_hash_plus)
   id_hash      = replace(local.id_hash_case, local.regex_replace_chars, local.replacement)
+
   # Create the short ID by adding a hash to the end of the truncated ID
   id_short = substr("${local.id_truncated}${local.id_hash}", 0, local.id_length_limit)
   id       = local.id_length_limit != 0 && length(local.id_full) > local.id_length_limit ? local.id_short : local.id_full
 
   ## Maximum length for a bucket name is 63, so we subtract 4 for the `sb-` prefix + delimiters and 12 for the account ID SHA (47); then subtract the hash length + delimiter length
   account_id_hash              = substr(sha512(data.aws_caller_identity.current.account_id), 0, 12)
-  s3_id_length_limit           = 63                                                                                                          ## max length for S3 bucket name
-  s3_short_id_length_limit     = local.s3_id_length_limit - length(format("sb-%s-%s", "", local.account_id_hash))                            # 47
-  s3_id_truncated_length_limit = local.s3_id_length_limit - (local.id_hash_length + local.delimiter_length + local.s3_short_id_length_limit) # 41
-
-  s3_id_truncated = "${trimsuffix(substr(local.id_brief, 0, local.s3_id_truncated_length_limit), local.delimiter)}${local.delimiter}"
-  s3_id_short     = substr("${local.s3_id_truncated}${local.id_hash}", 0, local.s3_short_id_length_limit)
+  s3_id_length_limit           = 63
+  s3_short_id_length_limit     = local.s3_id_length_limit - length(format("sb-%s-%s", "", local.account_id_hash))
+  s3_id_truncated_length_limit = local.s3_id_length_limit - local.id_hash_length - local.delimiter_length - local.s3_short_id_length_limit
+  s3_id_truncated              = "${trimsuffix(substr(local.id_brief, 0, local.s3_id_truncated_length_limit), local.delimiter)}${local.delimiter}"
+  s3_id_short                  = substr("${local.s3_id_truncated}${local.id_hash}", 0, local.s3_short_id_length_limit)
 
   s3_bucket_name = replace(
     format(

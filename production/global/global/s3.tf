@@ -1,5 +1,5 @@
 module "logging_bucket" {
-  source = "../../../modules/base/s3-bucket/v1"
+  source = "../../../modules/base/s3-bucket/v2"
   label  = module.log_bucket_label
 
   expiration_enabled                 = true

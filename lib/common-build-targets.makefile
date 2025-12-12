@@ -146,6 +146,13 @@ credentials-checks:
 
 ## Initialize backends and download Terraform provider plugins
 $(LOCK_JSON) init: global-variables.tf.json | credentials-checks
+	## Initialize terraform backend. We used to pass role_arn on the CLI here, but newer Terraform
+	## versions disallow or ignore some backend-configuration arguments on the CLI. The backend
+	## is already fully configured by `backend.tf.json` (created by `lib/create-backend-config`),
+	## which sets `profile` and `session_name`. If you need to assume a role for backend operations
+	## you should ensure credentials are available in the environment (AWS_PROFILE or tokens) or
+	## set them through the generated backend.tf.json. See README for guidance.
+	## $(TF) init $(INIT_ARGS)
 	$(TF) init -backend-config="role_arn=arn:aws:iam::501055688096:role/$(TERRAFORM_EXEC_ROLE)" $(INIT_ARGS)
 
 # Check that our terraform script is functioning

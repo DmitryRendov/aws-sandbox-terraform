@@ -1,43 +1,45 @@
 <!-- BEGIN_TF_DOCS -->
-## Purpose
-This module is used to create parameters in AWS Parameter Store. Secure Strings created with this module use a default value of `not_secret` and have no option set or update the value because that would cause the secret to live in our Terraform state files.
-The purpose of this module to to create secrets with a standardized naming and tag convention. There are three important tags that this module creates that are used by other roles:
-* label
-* username
-* secret
-
-`label`: is used to give developers and services access to the secrets their teams own. As long as the tag `team` tag on the label on the secret matches the team tag on the developer role they will have full access to the secret. And as long as the `role_name` and `environment` tag on the label matches the services `role_name` and `environment` of the service, the service will have the ability to read
-`username`: is used to only a specfic user access to the secret.
-`secret`: used to indicate if parameters are (not) secret and can have relaxed controls and IAM Permissions
-
-Note: We don't keep any secrets in Terraform, just provision placeholder in SSM. You need to pre-populate it on your own via AWS cli or API.
-
-## Example Usage
-> This example creates a new secret string parameter with the default value `not_secret`.
-```hcl
-module "secret" {
-  source = "../../../modules/site/ssm-parameter/v1"
-  secret_name = "mysql_password"
-  type = "SecureString"
-  description = "MySQL password for service"
-}
-```
-
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.73.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.14.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.73.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0.0 |
 
 ## Modules
 
-No modules.
+| Name | Source | Version |
+|------|--------|---------|
+| <a name="module_label"></a> [label](#module\_label) | ../../../base/label/v1 | n/a |
 
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_ssm_parameter.default_secure_string](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+| [aws_ssm_parameter.default_string](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter) | resource |
+
+## Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_description"></a> [description](#input\_description) | What is this secret used for. | `any` | n/a | yes |
+| <a name="input_label"></a> [label](#input\_label) | Single `label` resource for setting context and tagging resources. Typically this will be something like `module.label`. | `any` | n/a | yes |
+| <a name="input_secret_name"></a> [secret\_name](#input\_secret\_name) | Secret name will be /role\_name/environment/secret\_name | `any` | n/a | yes |
+| <a name="input_tier"></a> [tier](#input\_tier) | Either Standard or Advanced. Advanced is needed for secrets greater than 4k | `string` | `"Standard"` | no |
+| <a name="input_type"></a> [type](#input\_type) | Either SecureString or String | `any` | n/a | yes |
+| <a name="input_username"></a> [username](#input\_username) | User who has access to secret | `string` | `"NONE"` | no |
+| <a name="input_value"></a> [value](#input\_value) | Value of the parameter, not used for secure strings | `string` | `""` | no |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| <a name="output_parameter"></a> [parameter](#output\_parameter) | The SSM Parameter resource managed by this role |
 <!-- END_TF_DOCS -->

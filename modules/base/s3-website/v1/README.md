@@ -4,7 +4,7 @@
 http://docs.aws.amazon.com/AmazonS3/latest/dev/website-hosting-custom-domain-walkthrough.html
 
 ## Terraform versions
-Terraform >=0.12 is supported.
+Terraform >= 1.13.0 is supported.
 
 ## Usage
 
