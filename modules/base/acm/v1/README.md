@@ -1,39 +1,16 @@
 <!-- BEGIN_TF_DOCS -->
-## Purpose
-This module is used to request an ACM certificate for a domain and add a CNAME record to the DNS zone to complete certificate validation
-
-
-## Example Usage
-> This example will request an SSL certificate for example.com domain
-```hcl
-module "acm_request_certificate" {
-  source      = "../../../modules/base/acm/v1"
-  domain_name = "example.com"
-  label       = module.label
-}
-```
-> This example will request an SSL certificate for example.com domain and all subdomains *.example.com
-```hcl
-module "acm_request_certificate" {
-  source                    = "../../../modules/base/acm/v1"
-  domain_name               = "example.com"
-  subject_alternative_names = ["*.example.com"]
-  label                     = module.label
-}
-```
-
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.13 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 0.14.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0.0 |
 
 ## Modules
 

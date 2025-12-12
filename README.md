@@ -26,8 +26,7 @@ b. Unpack the package
 c. Update env variables
 
 ```
-mkdir ~/.go
-echo 'export GOPATH="$HOME/.go"' >> ~/.bashrc
+echo 'export GOPATH="$HOME/go"' >> ~/.bashrc
 echo 'export PATH="$PATH:$HOME/go/bin"' >> ~/.bashrc
 ```
 
@@ -112,7 +111,35 @@ where **501055688096** is your Bastion account ID, and do not forget to configur
 
 ## Running
 
+Before running any TF plans, we need to support the AWS authentication process using a simple bash script
+```lib/tools/aws-login.sh``` helps us obtain an STS token and specify TERRAFORM_EXEC_ROLE equal to your IAM role name in the AWS accounts.
+
+#### Enable supportive tools
+
+```
+echo 'export PATH="$PATH:$HOME/aws-sandbox-terraform/lib/tools"' >> ~/.bashrc
+echo 'export TERRAFORM_EXEC_ROLE=dmitry_rendov' >> ~/.bashrc
+source ~/.bashrc
+```
+
 We use `make` to wrap Terraform commands and include extra functionality.
+
+#### Example set role before commands
+```bash
+aws-login.sh login
+make plan-prod
+make apply-prod
+```
+
+#### Backend authentication and role assumption
+
+Note: Historically the Makefile passed `role_arn` to `terraform init` via `-backend-config`, but some Terraform versions or backend types reject this argument. The recommended way to authenticate and assume a role for S3 backend access is to:
+
+- Use `lib/tools/aws-login.sh login` which performs an STS assume-role and populates temporary credentials in your environment,
+- Or set an AWS profile with the necessary assume-role configuration (`~/.aws/config`) and let the generated `backend.tf.json` specify the `profile` and `session_name` that the backend should use.
+
+Avoid trying to pass `role_arn` via `-backend-config` on the CLI; instead ensure credentials are available in the environment before running `make`.
+
 
 #### Example commands
 ```
@@ -122,13 +149,6 @@ make plan-prod TERRAFORM_EXEC_ROLE=dmitry_rendov  #prod workspace using the joe 
 make apply-prod ARGS='-target=module.default'     #apply in prod and target one module
 ```
 
-#### Example set role before commands
-```bash
-aws-bastion.sh login
-export TERRAFORM_EXEC_ROLE=dmitry_rendov
-make plan-prod
-make apply-prod
-```
 
 ## Layout ##
 

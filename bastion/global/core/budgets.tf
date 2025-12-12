@@ -8,8 +8,11 @@ resource "aws_budgets_budget" "budget" {
 
   time_period_start = "${substr(timestamp(), 0, 8)}01_00:00"
 
-  cost_filters = {
-    LinkedAccount = lookup(local.budgets[count.index], "account")
+  cost_filter {
+    name = "LinkedAccount"
+    # Each resource is created per-entry in local.budgets. The cost filter should only
+    # include the account for the single budget being created here (count.index).
+    values = [lookup(local.budgets[count.index], "account")]
   }
 
   notification {
