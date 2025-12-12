@@ -128,7 +128,7 @@ show-%: check select-%
 
 ## Generate a backend.tf.json file for storing remote state
 backend.tf.json:
-	@[[ -f $(TF_ROOT)/lib/create-backend-config ]] && $(TF_ROOT)/lib/create-backend-config $(shell basename $(PWD))
+	@[ -f $(TF_ROOT)/lib/create-backend-config ] && $(TF_ROOT)/lib/create-backend-config $(shell basename $(PWD))
 
 ## Enables terraform remote config for S3
 enable-remote-state: backend.tf.json .terraform/terraform.tfstate
@@ -137,10 +137,10 @@ enable-remote-state: backend.tf.json .terraform/terraform.tfstate
 .terraform/terraform.tfstate: backend.tf.json $(LOCK_JSON)
 
 credentials-checks:
-	@[[ $${TERRAFORM_EXEC_ROLE} ]]      || { echo TERRAFORM_EXEC_ROLE is not set; exit 1; }
-	@[[ -z $${AWS_DEFAULT_REGION} ]]    || { echo AWS_DEFAULT_REGION environment variable need to be NOT SET - It overrides values in variables.tf, which can be bad.; exit 1; }
-	@[[ -z $${AWS_ACCESS_KEY_ID} ]]     || { echo AWS_ACCESS_KEY_ID environment variable needs to be NOT SET.; exit 1; }
-	@[[ -z $${AWS_SECRET_ACCESS_KEY} ]] || { echo AWS_SECRET_ACCESS_KEY environment variable needs to be NOT SET.; exit 1; }
+	@[ -n "$${TERRAFORM_EXEC_ROLE}" ]      || { echo TERRAFORM_EXEC_ROLE is not set; exit 1; }
+	@[ -z "$${AWS_DEFAULT_REGION}" ]    || { echo AWS_DEFAULT_REGION environment variable need to be NOT SET - It overrides values in variables.tf, which can be bad.; exit 1; }
+	@[ -z "$${AWS_ACCESS_KEY_ID}" ]     || { echo AWS_ACCESS_KEY_ID environment variable needs to be NOT SET.; exit 1; }
+	@[ -z "$${AWS_SECRET_ACCESS_KEY}" ] || { echo AWS_SECRET_ACCESS_KEY environment variable needs to be NOT SET.; exit 1; }
 	@$(TF_ROOT)/lib/verify-sts-token
         # AWS credentials ok.
 
