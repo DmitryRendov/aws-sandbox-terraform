@@ -2,7 +2,7 @@
 
 ## Pre-requisites
 
-1. Install dependencies (e.g. Ubintu 22)
+1. Install dependencies (e.g. Ubintu 24.04 LTS)
 ```bash
 sudo apt-get update && sudo apt-get -y upgrade
 sudo apt-get install -y git make jq tar unzip wget python3 python3-pip
@@ -17,11 +17,11 @@ python3 --version
 
 a. Download the Go
 
-```wget https://go.dev/dl/go1.25.1.linux-amd64.tar.gz```
+```wget https://go.dev/dl/go1.25.5.linux-amd64.tar.gz```
 
 b. Unpack the package
 
-```sudo rm -rf ~/go && tar -C ~/ -xzf go1.25.1.linux-amd64.tar.gz```
+```sudo rm -rf ~/go && tar -C ~/ -xzf go1.25.5.linux-amd64.tar.gz```
 
 c. Update env variables
 
@@ -64,7 +64,7 @@ The `setup` target in the Makefile installs and configures several development d
 
 - **pre-commit**: Installs the `pre-commit` Python package globally (if not already installed) and runs `pre-commit install` to set up Git hooks for automated code checks.
 - **terraform-config-inspect**: Installs the latest version of HashiCorp's `terraform-config-inspect` tool using Go. This tool is used to inspect Terraform modules and configurations programmatically.
-- **terraform-docs**: Installs version 0.15.0 of `terraform-docs` using Go, which generates documentation from Terraform modules.
+- **terraform-docs**: Installs `terraform-docs` using Go, which generates documentation from Terraform modules.
 - **Python requirements**: Installs all Python packages listed in `lib/requirements.txt` using pip3.
 
 If any required tool is missing, the setup will attempt to install it or prompt you with instructions.
@@ -109,12 +109,10 @@ terraform_sts_expiration = 1654554457
 where **501055688096** is your Bastion account ID, and do not forget to configure your MFA Virtual device.
 
 
-## Running
+## Enable supportive tools
 
 Before running any TF plans, we need to support the AWS authentication process using a simple bash script
-```lib/tools/aws-login.sh``` helps us obtain an STS token and specify TERRAFORM_EXEC_ROLE equal to your IAM role name in the AWS accounts.
-
-#### Enable supportive tools
+```lib/tools/aws-login.sh``` helps us obtain an STS token and specify TERRAFORM_EXEC_ROLE equal to your IAM role name in all the AWS accounts.
 
 ```
 echo 'export PATH="$PATH:$HOME/aws-sandbox-terraform/lib/tools"' >> ~/.bashrc
@@ -122,31 +120,18 @@ echo 'export TERRAFORM_EXEC_ROLE=dmitry_rendov' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-We use `make` to wrap Terraform commands and include extra functionality.
-
-#### Example set role before commands
-```bash
-aws-login.sh login
-make plan-prod
-make apply-prod
-```
-
 #### Backend authentication and role assumption
 
-Note: Historically the Makefile passed `role_arn` to `terraform init` via `-backend-config`, but some Terraform versions or backend types reject this argument. The recommended way to authenticate and assume a role for S3 backend access is to:
+TO-DO: Latest Terraform version does not support `role_arn` passed to `terraform init` via `-backend-config`. The recommended way to authenticate and assume a role for S3 backend access is to use `lib/tools/aws-login.sh login` which performs an STS assume-role and populates temporary credentials in your environment,
 
-- Use `lib/tools/aws-login.sh login` which performs an STS assume-role and populates temporary credentials in your environment,
-- Or set an AWS profile with the necessary assume-role configuration (`~/.aws/config`) and let the generated `backend.tf.json` specify the `profile` and `session_name` that the backend should use.
-
-Avoid trying to pass `role_arn` via `-backend-config` on the CLI; instead ensure credentials are available in the environment before running `make`.
-
+We use `make` to wrap Terraform commands and include extra functionality.
 
 #### Example commands
 ```
-make plan                                         #default workspace
-make plan-prod                                    #prod workspace
-make plan-prod TERRAFORM_EXEC_ROLE=dmitry_rendov  #prod workspace using the joe johnson role
-make apply-prod ARGS='-target=module.default'     #apply in prod and target one module
+make plan                                         # default workspace
+make plan-prod                                    # prod workspace
+make plan-prod TERRAFORM_EXEC_ROLE=dmitry_rendov  # prod workspace using the dmitry_rendov IAM role
+make apply-prod ARGS='-target=module.default'     # apply in prod and target one module
 ```
 
 
@@ -229,7 +214,7 @@ aws --profile prod-dmitry_rendov configure set source_profile sts
 
 Each user's permissions are defined in the Terraform repo (either in bastion/global/global/users.tf).
 
-By default, a user has Administrator Access to the Dev account and Read Only Access to other accounts unless specified otherwise. Each user can also manage their password and MFA device in the Dev account.
+By default, a user has Administrator Access to the Bastion account and Read Only Access to other accounts unless specified otherwise. Each user can also manage their password and MFA device in the Bastion account.
 
 ### Switching roles in the AWS web console
 Click on your name in the top right of the AWS console, and choose Switch Role

@@ -11,4 +11,3 @@ saved*plan
 .idea
 *.iml
 .vscode
-.terraform.lock.hcl
