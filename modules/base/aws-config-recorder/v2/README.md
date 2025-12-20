@@ -11,7 +11,7 @@ A Terraform module to configure AWS Config service in our AWS accounts and enabl
 An example AWS Config enabled in us-east-1 region with enabled global resource recording:
 ```
 module "aws_config_recorder_east" {
-  source      = "../../../modules/base/aws-config-recorder/v1"
+  source      = "../../../modules/base/aws-config-recorder/v2"
   environment = terraform.workspace
   label       = module.label
 
@@ -27,13 +27,13 @@ module "aws_config_recorder_east" {
 
 ## History
 
-### v3
-- Update to support new labels module
 
 ### v2
-- Fix `record_global_resources` variable
+- Update the module to TF 0.15.5, fix providers
 
 ### v1
+- Update to support new labels module
+- Fix `record_global_resources` variable
 - Initial release (decoupled from aws-config module)
 
 <!-- BEGINNING OF TERRAFORM-DOCS HOOK -->

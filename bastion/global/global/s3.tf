@@ -1,6 +1,6 @@
 # S3 bucket for Private Backups
 module "backup" {
-  source      = "../../../modules/base/s3-bucket/v2"
+  source      = "../../../modules/base/s3-bucket/v3"
   label       = module.label
   bucket_name = "mob-private-backups"
 

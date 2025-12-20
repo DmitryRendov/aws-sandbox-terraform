@@ -1,5 +1,5 @@
 module "aws_config_recorder" {
-  source = "../../../modules/base/aws-config-recorder/v1"
+  source = "../../../modules/base/aws-config-recorder/v2"
   count  = local.config_recorder_enabled ? 1 : 0
 
   label              = module.label
@@ -12,7 +12,7 @@ module "aws_config_recorder" {
 }
 
 module "aws_config_recorder_west" {
-  source = "../../../modules/base/aws-config-recorder/v1"
+  source = "../../../modules/base/aws-config-recorder/v2"
   count  = local.config_recorder_enabled ? 1 : 0
 
   label              = module.label
