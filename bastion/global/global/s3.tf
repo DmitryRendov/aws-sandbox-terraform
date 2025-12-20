@@ -7,6 +7,7 @@ module "backup" {
   versioning_enabled            = false
   backups_enabled               = false
   transition_to_onezone_ia_days = "30"
+  transition_to_glacier_days    = "90"
 
   providers = {
     aws.src = aws

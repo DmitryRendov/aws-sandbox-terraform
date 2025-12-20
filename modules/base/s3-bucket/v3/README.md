@@ -117,7 +117,11 @@ module "s3_bucket" {
 ## History:
 
 ### v3:
-- Update the module to TF 0.15.5, fix providers section
+- Update the module to TF 0.15.5, fix providers configuration
+- Move lifecycle rules to aws_s3_bucket_lifecycle_configuration resource
+- Move versioning to aws_s3_bucket_versioning resource
+- Move ACL to aws_s3_bucket_acl resource
+- Update README with usage examples
 
 ### v2:
 - Support One Zone IA mode as S3 life-cycle
