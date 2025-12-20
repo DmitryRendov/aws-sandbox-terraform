@@ -1,12 +1,13 @@
 # S3 bucket for Private Backups
 module "backup" {
-  source      = "../../../modules/base/s3-bucket/v2"
+  source      = "../../../modules/base/s3-bucket/v3"
   label       = module.label
   bucket_name = "mob-private-backups"
 
   versioning_enabled            = false
   backups_enabled               = false
   transition_to_onezone_ia_days = "30"
+  transition_to_glacier_days    = "90"
 
   providers = {
     aws.src = aws

@@ -19,7 +19,7 @@ Terraform >= 1.13.0 is supported.
 ### Bucket setup for the S3 logging
 ```hcl
 module "s3_logging" {
-  source      = "../../../modules/base/s3-bucket/v1"
+  source      = "../../../modules/base/s3-bucket/v3"
   label       = module.label
 
   transition_to_glacier_days = 90
@@ -41,7 +41,7 @@ module "s3_logging" {
 ### Private bucket with versioning enabled
 ```hcl
 module "s3_bucket" {
-  source             = "../../../modules/base/s3-bucket/v1"
+  source             = "../../../modules/base/s3-bucket/v3"
   label              = module.label
   versioning_enabled = true
 
@@ -75,7 +75,7 @@ module "s3_bucket_crr" {
 
 ```hcl
 module "flow_logs_bucket" {
-  source = "../../../modules/base/s3-bucket/v1"
+  source = "../../../modules/base/s3-bucket/v3"
 
   label = module.label
 
@@ -101,7 +101,7 @@ Sometimes you need to have a way to create S3 resources conditionally, so the so
 ```hcl
 # This S3 bucket will not be created
 module "s3_bucket" {
-  source             = "../../../modules/site/s3-bucket/v1"
+  source             = "../../../modules/site/s3-bucket/v3"
   label              = module.label
 
   count = 0 # or count = some_condition ? 1 : 0
@@ -115,6 +115,13 @@ module "s3_bucket" {
 ```
 
 ## History:
+
+### v3:
+- Update the module to TF 0.15.5, fix providers configuration
+- Move lifecycle rules to aws_s3_bucket_lifecycle_configuration resource
+- Move versioning to aws_s3_bucket_versioning resource
+- Move ACL to aws_s3_bucket_acl resource
+- Update README with usage examples
 
 ### v2:
 - Support One Zone IA mode as S3 life-cycle

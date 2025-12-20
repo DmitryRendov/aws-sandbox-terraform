@@ -1,11 +1,3 @@
-provider "aws" {
-  alias = "src"
-}
-
-provider "aws" {
-  alias = "dst"
-}
-
 data "aws_caller_identity" "current" {
 }
 
@@ -34,106 +26,11 @@ module "s3_label" {
 resource "aws_s3_bucket" "bucket" {
   provider = aws.src
   bucket   = local.bucket_name
-  acl      = length(var.acl_policy_grants) > 0 ? null : "private"
   tags = merge(
     module.s3_label.tags,
     var.versioning_enabled && var.backups_enabled ? merge({ "BackupPlan" = "Daily" },
     { "crr:dst_bucket" = local.crr_bucket_name }) : {}
   )
-
-  lifecycle_rule {
-    id                                     = "abort-incomplete-multipart-uploads"
-    enabled                                = true
-    prefix                                 = ""
-    abort_incomplete_multipart_upload_days = 7
-
-    expiration {
-      days                         = 0
-      expired_object_delete_marker = false
-    }
-  }
-
-  dynamic "grant" {
-    for_each = var.acl_policy_grants
-    iterator = grant
-    content {
-      id          = lookup(grant.value, "id")
-      type        = lookup(grant.value, "type")
-      permissions = lookup(grant.value, "permissions")
-    }
-  }
-
-  dynamic "lifecycle_rule" {
-    for_each = var.expiration_enabled ? [1] : []
-    content {
-      id      = "expire-objects"
-      enabled = var.expiration_enabled
-      prefix  = var.expiration_prefix
-
-      expiration {
-        days = var.expiration_days
-      }
-    }
-  }
-
-  dynamic "lifecycle_rule" {
-    for_each = var.noncurrent_version_expiration_days > 0 ? [1] : []
-    content {
-      enabled = true
-      id      = "delete-noncurrent-object-versions"
-      prefix  = ""
-
-      noncurrent_version_expiration {
-        days = var.noncurrent_version_expiration_days
-      }
-    }
-  }
-
-  dynamic "lifecycle_rule" {
-    for_each = var.transition_to_ia_days > 0 || var.transition_to_onezone_ia_days > 0 || var.transition_to_glacier_days > 0 ? [1] : []
-    content {
-      enabled = true
-      id      = "transition-to-cheaper-storage-over-time"
-      prefix  = ""
-
-      dynamic "transition" {
-        for_each = var.transition_to_ia_days > 0 ? [1] : []
-        content {
-
-          days          = var.transition_to_ia_days
-          storage_class = "STANDARD_IA"
-        }
-      }
-      dynamic "transition" {
-        for_each = var.transition_to_onezone_ia_days > 0 ? [1] : []
-        content {
-
-          days          = var.transition_to_onezone_ia_days
-          storage_class = "ONEZONE_IA"
-        }
-      }
-      dynamic "transition" {
-        for_each = var.transition_to_glacier_days > 0 ? [1] : []
-        content {
-          days          = var.transition_to_glacier_days
-          storage_class = "GLACIER"
-        }
-      }
-    }
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        kms_master_key_id = var.kms_key_arn
-        sse_algorithm     = var.kms_key_arn != null ? "aws:kms" : "AES256"
-      }
-    }
-  }
-
-  versioning {
-    enabled = local.versioning_enabled
-  }
 
   dynamic "replication_configuration" {
     for_each = var.versioning_enabled && var.backups_enabled ? [1] : []
@@ -187,6 +84,34 @@ resource "aws_s3_bucket" "bucket" {
 
 }
 
+resource "aws_s3_bucket_acl" "bucket" {
+  provider = aws.src
+  bucket   = aws_s3_bucket.bucket.id
+  acl      = length(var.acl_policy_grants) > 0 ? null : "private"
+
+  dynamic "access_control_policy" {
+    for_each = length(var.acl_policy_grants) > 0 ? [1] : []
+    content {
+      dynamic "grant" {
+        for_each = var.acl_policy_grants
+        iterator = grant
+        content {
+          grantee {
+            id   = lookup(grant.value, "id")
+            type = lookup(grant.value, "type")
+          }
+          permission = lookup(grant.value, "permissions")
+        }
+      }
+      owner {
+        id = data.aws_caller_identity.current.account_id
+      }
+    }
+  }
+
+  depends_on = [aws_s3_bucket_public_access_block.bucket]
+}
+
 # By default, we want to block Public Access for all S3 buckets in accounts that do not need public access.
 resource "aws_s3_bucket_public_access_block" "bucket" {
   provider = aws.src
@@ -196,6 +121,105 @@ resource "aws_s3_bucket_public_access_block" "bucket" {
   ignore_public_acls      = var.ignore_public_acls
   block_public_policy     = var.block_public_policy
   restrict_public_buckets = var.restrict_public_buckets
+}
+
+resource "aws_s3_bucket_versioning" "bucket" {
+  provider = aws.src
+  bucket   = aws_s3_bucket.bucket.id
+
+  versioning_configuration {
+    status = local.versioning_enabled ? "Enabled" : "Suspended"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "bucket" {
+  provider = aws.src
+  bucket   = aws_s3_bucket.bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      kms_master_key_id = var.kms_key_arn
+      sse_algorithm     = var.kms_key_arn != null ? "aws:kms" : "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "bucket" {
+  provider = aws.src
+  bucket   = aws_s3_bucket.bucket.id
+
+  rule {
+    id     = "abort-incomplete-multipart-uploads"
+    status = "Enabled"
+
+    filter {}
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.expiration_enabled ? [1] : []
+    content {
+      id     = "expire-objects"
+      status = var.expiration_enabled ? "Enabled" : "Disabled"
+
+      filter {
+        prefix = var.expiration_prefix
+      }
+
+      expiration {
+        days = var.expiration_days
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.noncurrent_version_expiration_days > 0 ? [1] : []
+    content {
+      status = "Enabled"
+      id     = "delete-noncurrent-object-versions"
+
+      filter {}
+
+      noncurrent_version_expiration {
+        noncurrent_days = var.noncurrent_version_expiration_days
+      }
+    }
+  }
+
+  dynamic "rule" {
+    for_each = var.transition_to_ia_days > 0 || var.transition_to_onezone_ia_days > 0 || var.transition_to_glacier_days > 0 ? [1] : []
+    content {
+      status = "Enabled"
+      id     = "transition-to-cheaper-storage-over-time"
+
+      filter {}
+
+      dynamic "transition" {
+        for_each = var.transition_to_ia_days > 0 ? [1] : []
+        content {
+          days          = var.transition_to_ia_days
+          storage_class = "STANDARD_IA"
+        }
+      }
+      dynamic "transition" {
+        for_each = var.transition_to_onezone_ia_days > 0 ? [1] : []
+        content {
+          days          = var.transition_to_onezone_ia_days
+          storage_class = "ONEZONE_IA"
+        }
+      }
+      dynamic "transition" {
+        for_each = var.transition_to_glacier_days > 0 ? [1] : []
+        content {
+          days          = var.transition_to_glacier_days
+          storage_class = "GLACIER"
+        }
+      }
+    }
+  }
 }
 
 
@@ -280,41 +304,60 @@ resource "aws_s3_bucket" "s3_backups" {
   provider = aws.dst
   count    = var.versioning_enabled && var.backups_enabled ? 1 : 0
   bucket   = local.crr_bucket_name
-  acl      = "private"
   tags = merge(
     module.s3_label.tags,
     { "crr:src_bucket" = local.bucket_name },
     { "crr:dst_bucket" = local.crr_bucket_name },
   )
+}
 
-  versioning {
-    enabled = true
+resource "aws_s3_bucket_acl" "s3_backups" {
+  provider = aws.dst
+  count    = var.versioning_enabled && var.backups_enabled ? 1 : 0
+  bucket   = aws_s3_bucket.s3_backups[0].id
+  acl      = "private"
+
+  depends_on = [aws_s3_bucket_public_access_block.s3_backups]
+}
+
+resource "aws_s3_bucket_versioning" "s3_backups" {
+  provider = aws.dst
+  count    = var.versioning_enabled && var.backups_enabled ? 1 : 0
+  bucket   = aws_s3_bucket.s3_backups[0].id
+
+  versioning_configuration {
+    status = "Enabled"
   }
+}
 
-  lifecycle_rule {
-    enabled                                = true
-    prefix                                 = ""
-    abort_incomplete_multipart_upload_days = 7
+resource "aws_s3_bucket_lifecycle_configuration" "s3_backups" {
+  provider = aws.dst
+  count    = var.versioning_enabled && var.backups_enabled ? 1 : 0
+  bucket   = aws_s3_bucket.s3_backups[0].id
+
+  rule {
+    id     = "abort-incomplete-multipart-uploads"
+    status = "Enabled"
+
+    filter {}
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
 
     noncurrent_version_expiration {
-      days = 14
+      noncurrent_days = 14
     }
   }
 
-  lifecycle_rule {
-    prefix  = ""
-    enabled = true
+  rule {
+    id     = "expire-delete-markers"
+    status = "Enabled"
+
+    filter {}
 
     expiration {
       expired_object_delete_marker = true
-    }
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
     }
   }
 }
@@ -328,6 +371,18 @@ resource "aws_s3_bucket_public_access_block" "s3_backups" {
   ignore_public_acls      = var.ignore_public_acls
   block_public_policy     = var.block_public_policy
   restrict_public_buckets = var.restrict_public_buckets
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "s3_backups" {
+  provider = aws.dst
+  count    = var.versioning_enabled && var.backups_enabled ? 1 : 0
+  bucket   = aws_s3_bucket.s3_backups[0].id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
 }
 
 resource "aws_s3_bucket_policy" "s3_backups" {
