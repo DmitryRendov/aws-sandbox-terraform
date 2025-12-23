@@ -12,3 +12,8 @@ output "developers_group" {
   description = "IAM Developers group"
   value       = aws_iam_group.developers
 }
+
+output "admin_username" {
+  description = "IAM Admin username"
+  value       = module.dmitry_rendov.name
+}
