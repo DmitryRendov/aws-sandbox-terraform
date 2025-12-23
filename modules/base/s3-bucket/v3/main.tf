@@ -85,6 +85,7 @@ resource "aws_s3_bucket" "bucket" {
 }
 
 resource "aws_s3_bucket_acl" "bucket" {
+  count    = length(var.acl_policy_grants) > 0 ? 1 : 0
   provider = aws.src
   bucket   = aws_s3_bucket.bucket.id
   acl      = length(var.acl_policy_grants) > 0 ? null : "private"

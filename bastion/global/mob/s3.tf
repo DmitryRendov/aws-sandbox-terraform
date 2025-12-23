@@ -41,6 +41,7 @@ data "aws_iam_policy_document" "private_mob_policy" {
 }
 
 resource "aws_s3_bucket_policy" "restrict_only_owner" {
-  bucket = module.mob.id
-  policy = data.aws_iam_policy_document.private_mob_policy.json
+  provider = aws.central
+  bucket   = module.mob.id
+  policy   = data.aws_iam_policy_document.private_mob_policy.json
 }
