@@ -197,6 +197,17 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket" {
 
       filter {}
 
+      # Storage Class Options for AWS S3
+      # The `storage_class` parameter in AWS S3 bucket lifecycle rules supports the following values:
+      # - `STANDARD` - Default storage class for frequently accessed data
+      # - `REDUCED_REDUNDANCY` - Lower redundancy, lower cost (deprecated)
+      # - `STANDARD_IA` - Infrequent Access, lower cost for infrequently accessed objects
+      # - `ONEZONE_IA` - One Zone Infrequent Access, single AZ storage
+      # - `INTELLIGENT_TIERING` - Automatic cost optimization by moving objects between access tiers
+      # - `GLACIER` - Long-term archival storage with retrieval times in hours
+      # - `GLACIER_IR` - Glacier Instant Retrieval, faster access than standard Glacier
+      # - `DEEP_ARCHIVE` - Lowest cost archival storage with retrieval times up to 12 hours
+
       dynamic "transition" {
         for_each = var.transition_to_ia_days > 0 ? [1] : []
         content {
