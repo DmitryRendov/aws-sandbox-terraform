@@ -10,7 +10,7 @@ module "mob" {
   transition_to_glacier_days    = "90"
 
   providers = {
-    aws.src = aws
+    aws.src = aws.central
     aws.dst = aws.west
   }
 }
