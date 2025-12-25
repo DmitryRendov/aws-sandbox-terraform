@@ -9,11 +9,21 @@ module "backup" {
   transition_to_onezone_ia_days = "30"
   transition_to_glacier_days    = "90"
 
+  acl_policy_grants = [
+    {
+      id          = data.aws_canonical_user_id.current.id
+      type        = "CanonicalUser"
+      permissions = "FULL_CONTROL"
+    }
+  ]
+
   providers = {
     aws.src = aws
     aws.dst = aws.west
   }
 }
+
+data "aws_canonical_user_id" "current" {}
 
 data "aws_iam_policy_document" "private_backups_policy" {
 

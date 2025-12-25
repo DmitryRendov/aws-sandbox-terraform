@@ -1,6 +1,10 @@
 data "aws_caller_identity" "current" {
 }
 
+data "aws_canonical_user_id" "current" {
+  provider = aws.src
+}
+
 data "aws_caller_identity" "src" {
   provider = aws.src
 }
@@ -105,7 +109,7 @@ resource "aws_s3_bucket_acl" "bucket" {
         }
       }
       owner {
-        id = data.aws_caller_identity.current.account_id
+        id = data.aws_canonical_user_id.current.id
       }
     }
   }

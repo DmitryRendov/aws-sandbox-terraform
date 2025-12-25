@@ -48,3 +48,21 @@ resource "aws_iam_group_policy_attachment" "force_mfa" {
   group      = aws_iam_group.sandbox.name
   policy_arn = aws_iam_policy.force_mfa.arn
 }
+
+##
+# Automation
+#
+resource "aws_iam_group" "automation" {
+  name = "automation"
+  path = "/terraform/"
+}
+
+resource "aws_iam_group_membership" "automation" {
+  name = "automation-group-membership"
+
+  users = [
+    aws_iam_user.automation_user.name,
+  ]
+
+  group = aws_iam_group.automation.name
+}

@@ -24,3 +24,9 @@ module "deactivated_label" {
   context    = module.label.context
   attributes = ["deactivated"]
 }
+
+module "automation_user_label" {
+  source  = "../../../modules/base/label/v1"
+  context = module.label.context
+  name    = "automation"
+}
