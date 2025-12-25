@@ -304,3 +304,32 @@ resource "aws_iam_policy" "deactivated_user" {
   name   = module.deactivated_label.id
   policy = data.aws_iam_policy_document.deactivated_permissions.json
 }
+
+### AUTOMATION ###
+
+resource "aws_iam_policy" "automation_permissions" {
+  name   = module.automation_user_label.id
+  policy = data.aws_iam_policy_document.automation_permissions.json
+}
+
+data "aws_iam_policy_document" "automation_permissions" {
+  statement {
+    sid = "AllowAutomationMOBBucket"
+    actions = [
+      "s3:DeleteObject",
+      "s3:Get*",
+      "s3:List*",
+      "s3:PutObject",
+      "s3:AbortMultipartUpload",
+    ]
+
+    resources = [
+      "arn:aws:s3:::mob-server-backups/",
+      "arn:aws:s3:::mob-server-backups/*",
+    ]
+  }
+}
+
+
+
+### END AUTOMATION ###

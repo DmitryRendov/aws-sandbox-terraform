@@ -131,6 +131,10 @@
       "default": "mob-terraform-state",
       "description": "Terraform remote s3 backend bucket name"
     },
+    "terraform_remote_state_mob_bucket": {
+      "default": "mob-server-backups",
+      "description": "Terraform remote serverless s3 bucket for production"
+    },
     "terraform_remote_state_region": {
       "default": "us-east-1",
       "description": "Terraform remote s3 storage region"

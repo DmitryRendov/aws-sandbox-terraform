@@ -2,6 +2,8 @@ locals {
   role_name = "global"
   team      = "ops"
 
+  automation_username = "automation"
+
   security_hub_enabled = false
 
   config_recorder_enabled            = false
@@ -22,4 +24,13 @@ locals {
       aws_iam_policy.ops_bastion_role_iam.arn,
     ]
   }
+
+  automation_policies = {
+    automation_bastion_policy_arns = {
+      readonly    = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+      permissions = aws_iam_policy.automation_permissions.arn
+      secrets     = aws_iam_policy.automation_secrets.arn
+    }
+  }
+
 }
