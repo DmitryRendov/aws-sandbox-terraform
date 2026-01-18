@@ -14,4 +14,5 @@ module "acm_request_certificate" {
   subject_alternative_names = ["*.${local.domain_name}"]
   zone_name                 = module.hosted_zones.route53_zone_name[local.domain_name]
   label                     = module.label
+  depends_on                = [module.hosted_zones]
 }

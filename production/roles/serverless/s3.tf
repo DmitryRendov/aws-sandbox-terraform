@@ -1,10 +1,12 @@
 # S3 bucket for Serverless Lambda Functions
 module "serverless_lambdas" {
-  source = "../../../modules/base/s3-bucket/v1"
+  source = "../../../modules/base/s3-bucket/v3"
   label  = module.label
 
   versioning_enabled = false
   backups_enabled    = false
+
+  acl_policy_grants = []
 
   providers = {
     aws.src = aws
