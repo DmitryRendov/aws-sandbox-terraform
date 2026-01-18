@@ -1,6 +1,11 @@
 ## Purpose
 <!-- What is this role for? -->
 
+This role manages the Route 53 DNS configurations for the production environment on a global scale.
+It handles domain registrations, DNS records, and health checks to ensure high availability and reliability of the production services.
+
+Disabled for now.
+
 ## Workspaces
 <!-- Which workspaces does this role use? -->
 
