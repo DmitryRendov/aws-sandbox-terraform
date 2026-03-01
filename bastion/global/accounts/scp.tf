@@ -4,6 +4,7 @@
 
 data "aws_iam_policy_document" "scp" {
   source_policy_documents = [
+    data.aws_iam_policy_document.deny_aws_services.json,
     data.aws_iam_policy_document.deny_disallowed_regions.json,
     data.aws_iam_policy_document.deny_iam_create_access_key.json,
     data.aws_iam_policy_document.deny_root_access.json,
